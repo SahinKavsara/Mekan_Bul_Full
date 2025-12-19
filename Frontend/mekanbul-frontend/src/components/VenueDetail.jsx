@@ -37,16 +37,12 @@ const VenueDetail = () => {
 
   return (
     <div>
-      
-
       {isError ? (
         // HATA DURUMU
         <div className="container">
             <div className="row">
                 <div className="col-xs-12">
-                    <p>
-                        <strong>Birşeyler ters gitti! ...</strong>
-                    </p>
+                    <p><strong>Bir şeyler ters gitti! ...</strong></p>
                 </div>
             </div>
         </div>
@@ -55,9 +51,7 @@ const VenueDetail = () => {
         <div className="container">
             <div className="row">
                 <div className="col-xs-12">
-                    <p>
-                        <strong>Mekanlar Yükleniyor ...</strong>
-                    </p>
+                    <p><strong>Mekanlar Yükleniyor ...</strong></p>
                 </div>
             </div>
         </div>
@@ -130,20 +124,23 @@ const VenueDetail = () => {
                   </div>
                 </div>
 
-                {/* YORUMLAR BÖLÜMÜ */}
                 <div className="row">
                   <div className="col-xs-12 ">
                     <div className="panel panel-primary">
-                      <div className="panel-heading ">
+                      
+                      {/* Flexbox ile Başlık ve Butonu Hizalama */}
+                      <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h2 className="panel-title" style={{ margin: 0 }}>Yorumlar</h2>
+                        
                         <NavLink
-                          className="btn btn-default pull-right"
+                          className="btn btn-default btn-xs" 
                           to={`/venue/${id}/comment/new`}
                           state={{ name: venue.name }}
                         >
-                          Yorum Ekle{" "}
+                          Yorum Ekle
                         </NavLink>
-                        <h2 className="panel-title ">Yorumlar</h2>
                       </div>
+
                       <div className="panel-body ">
                         <CommentList commentList={venue.comments || []} />
                       </div>
@@ -159,5 +156,4 @@ const VenueDetail = () => {
   );
 };
 
-// Bileşeni dışa aktar
 export default VenueDetail;
