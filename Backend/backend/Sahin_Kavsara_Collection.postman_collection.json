@@ -1,0 +1,861 @@
+{
+	"info": {
+		"_postman_id": "8e3c9c81-13a5-411b-a67c-70fb1346e556",
+		"name": "Sahin_Kavsara_Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50538942",
+		"_collection_link": "https://kavsara12-5961357.postman.co/workspace/%25C5%259Eahin-Kavsara's-Workspace~bcacdb3c-2f0e-48ff-8bae-8b9e2cd7e7d5/collection/50538942-8e3c9c81-13a5-411b-a67c-70fb1346e556?action=share&source=collection_link&creator=50538942"
+	},
+	"item": [
+		{
+			"name": "MekanListe1",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues/69283a93167d5f9a263022e5",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues",
+						"69283a93167d5f9a263022e5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MekanListe2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues/69283a92167d5f9a263022e3",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues",
+						"69283a92167d5f9a263022e3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "YorumEkleme1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "author",
+							"value": "Kemal",
+							"type": "text"
+						},
+						{
+							"key": "rating",
+							"value": "2",
+							"type": "text"
+						},
+						{
+							"key": "text",
+							"value": "Begenmedim",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues/69283a92167d5f9a263022e3/comments",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues",
+						"69283a92167d5f9a263022e3",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "YorumEkleme2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "author",
+							"value": "Şahin",
+							"type": "text"
+						},
+						{
+							"key": "rating",
+							"value": "5",
+							"type": "text"
+						},
+						{
+							"key": "text",
+							"value": "Lezzetli Kavurmaları Var",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues/69283a94167d5f9a263022e6/comments?author=Şahin&rating=5&text=Lezzetli Kavurmaları Var",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues",
+						"69283a94167d5f9a263022e6",
+						"comments"
+					],
+					"query": [
+						{
+							"key": "author",
+							"value": "Şahin"
+						},
+						{
+							"key": "rating",
+							"value": "5"
+						},
+						{
+							"key": "text",
+							"value": "Lezzetli Kavurmaları Var"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "YorumSilme1",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "author",
+							"value": "Şahin",
+							"type": "text"
+						},
+						{
+							"key": "rating",
+							"value": "5",
+							"type": "text"
+						},
+						{
+							"key": "text",
+							"value": "Lezzetli Kavurmaları Var",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues/69283a92167d5f9a263022e3/comments/693c46a78a0408b885d50c8a",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues",
+						"69283a92167d5f9a263022e3",
+						"comments",
+						"693c46a78a0408b885d50c8a"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "YorumSilme2",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "author",
+							"value": "Şahin",
+							"type": "text"
+						},
+						{
+							"key": "rating",
+							"value": "5",
+							"type": "text"
+						},
+						{
+							"key": "text",
+							"value": "Lezzetli Kavurmaları Var",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues/69283a94167d5f9a263022e6/comments/693c47268a0408b885d50c99",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues",
+						"69283a94167d5f9a263022e6",
+						"comments",
+						"693c47268a0408b885d50c99"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MekanEkleme1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "Arabica Cafe",
+							"type": "text"
+						},
+						{
+							"key": "address",
+							"value": "Denizli",
+							"type": "text"
+						},
+						{
+							"key": "foodanddrink",
+							"value": "Kahve,Tatlı",
+							"type": "text"
+						},
+						{
+							"key": "lat",
+							"value": "35",
+							"type": "text"
+						},
+						{
+							"key": "long",
+							"value": "40",
+							"type": "text"
+						},
+						{
+							"key": "day1",
+							"value": "Pazartesi,Cuma",
+							"type": "text"
+						},
+						{
+							"key": "open1",
+							"value": "9:00",
+							"type": "text"
+						},
+						{
+							"key": "close1",
+							"value": "11:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed1",
+							"value": "false",
+							"type": "text"
+						},
+						{
+							"key": "day2",
+							"value": "Cumartesi",
+							"type": "text"
+						},
+						{
+							"key": "open2",
+							"value": "9:00",
+							"type": "text"
+						},
+						{
+							"key": "close2",
+							"value": "11:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed2",
+							"value": "false",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MekanEkleme2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "KvsSoftware",
+							"type": "text"
+						},
+						{
+							"key": "address",
+							"value": "Denizli",
+							"type": "text"
+						},
+						{
+							"key": "foodanddrink",
+							"value": "Yazılım",
+							"type": "text"
+						},
+						{
+							"key": "lat",
+							"value": "20",
+							"type": "text"
+						},
+						{
+							"key": "long",
+							"value": "20",
+							"type": "text"
+						},
+						{
+							"key": "day1",
+							"value": "Pazartesi,Pazar",
+							"type": "text"
+						},
+						{
+							"key": "open1",
+							"value": "9:00",
+							"type": "text"
+						},
+						{
+							"key": "close1",
+							"value": "17:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed1",
+							"value": "false",
+							"type": "text"
+						},
+						{
+							"key": "day2",
+							"value": "Cumartesi",
+							"type": "text"
+						},
+						{
+							"key": "open2",
+							"value": "9:00",
+							"type": "text"
+						},
+						{
+							"key": "close2",
+							"value": "17:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed2",
+							"value": "false",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MekanSilme1",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "KvsSoftware",
+							"type": "text"
+						},
+						{
+							"key": "address",
+							"value": "Denizli",
+							"type": "text"
+						},
+						{
+							"key": "foodanddrink",
+							"value": "Yazılım",
+							"type": "text"
+						},
+						{
+							"key": "lat",
+							"value": "20",
+							"type": "text"
+						},
+						{
+							"key": "long",
+							"value": "20",
+							"type": "text"
+						},
+						{
+							"key": "day1",
+							"value": "Pazartesi,Pazar",
+							"type": "text"
+						},
+						{
+							"key": "open1",
+							"value": "9:00",
+							"type": "text"
+						},
+						{
+							"key": "close1",
+							"value": "17:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed1",
+							"value": "false",
+							"type": "text"
+						},
+						{
+							"key": "day2",
+							"value": "Cumartesi",
+							"type": "text"
+						},
+						{
+							"key": "open2",
+							"value": "9:00",
+							"type": "text"
+						},
+						{
+							"key": "close2",
+							"value": "17:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed2",
+							"value": "false",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues/69283a93167d5f9a263022e4",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues",
+						"69283a93167d5f9a263022e4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MekanUpdate1",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "KvsSoftware",
+							"type": "text"
+						},
+						{
+							"key": "address",
+							"value": "Denizli",
+							"type": "text"
+						},
+						{
+							"key": "foodanddrink",
+							"value": "Yazılım",
+							"type": "text"
+						},
+						{
+							"key": "lat",
+							"value": "20",
+							"type": "text"
+						},
+						{
+							"key": "long",
+							"value": "20",
+							"type": "text"
+						},
+						{
+							"key": "day1",
+							"value": "Pazartesi,Pazar",
+							"type": "text"
+						},
+						{
+							"key": "open1",
+							"value": "10:00",
+							"type": "text"
+						},
+						{
+							"key": "close1",
+							"value": "17:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed1",
+							"value": "false",
+							"type": "text"
+						},
+						{
+							"key": "day2",
+							"value": "Cumartesi",
+							"type": "text"
+						},
+						{
+							"key": "open2",
+							"value": "9:00",
+							"type": "text"
+						},
+						{
+							"key": "close2",
+							"value": "17:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed2",
+							"value": "false",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues/693c4ee68fb73334ef1ae4e8",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues",
+						"693c4ee68fb73334ef1ae4e8"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "YakınMekanListele",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "KvsSoftware",
+							"type": "text"
+						},
+						{
+							"key": "address",
+							"value": "Denizli",
+							"type": "text"
+						},
+						{
+							"key": "foodanddrink",
+							"value": "Yazılım",
+							"type": "text"
+						},
+						{
+							"key": "lat",
+							"value": "20",
+							"type": "text"
+						},
+						{
+							"key": "long",
+							"value": "20",
+							"type": "text"
+						},
+						{
+							"key": "day1",
+							"value": "Pazartesi,Pazar",
+							"type": "text"
+						},
+						{
+							"key": "open1",
+							"value": "10:00",
+							"type": "text"
+						},
+						{
+							"key": "close1",
+							"value": "17:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed1",
+							"value": "false",
+							"type": "text"
+						},
+						{
+							"key": "day2",
+							"value": "Cumartesi",
+							"type": "text"
+						},
+						{
+							"key": "open2",
+							"value": "9:00",
+							"type": "text"
+						},
+						{
+							"key": "close2",
+							"value": "17:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed2",
+							"value": "false",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues?lat=37.7830&long=30.5423",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues"
+					],
+					"query": [
+						{
+							"key": "lat",
+							"value": "37.7830"
+						},
+						{
+							"key": "long",
+							"value": "30.5423"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "YorumListele",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "KvsSoftware",
+							"type": "text"
+						},
+						{
+							"key": "address",
+							"value": "Denizli",
+							"type": "text"
+						},
+						{
+							"key": "foodanddrink",
+							"value": "Yazılım",
+							"type": "text"
+						},
+						{
+							"key": "lat",
+							"value": "20",
+							"type": "text"
+						},
+						{
+							"key": "long",
+							"value": "20",
+							"type": "text"
+						},
+						{
+							"key": "day1",
+							"value": "Pazartesi,Pazar",
+							"type": "text"
+						},
+						{
+							"key": "open1",
+							"value": "10:00",
+							"type": "text"
+						},
+						{
+							"key": "close1",
+							"value": "17:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed1",
+							"value": "false",
+							"type": "text"
+						},
+						{
+							"key": "day2",
+							"value": "Cumartesi",
+							"type": "text"
+						},
+						{
+							"key": "open2",
+							"value": "9:00",
+							"type": "text"
+						},
+						{
+							"key": "close2",
+							"value": "17:00",
+							"type": "text"
+						},
+						{
+							"key": "isClosed2",
+							"value": "false",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues/69283a92167d5f9a263022e3/comments/693c454e8a0408b885d50c77",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues",
+						"69283a92167d5f9a263022e3",
+						"comments",
+						"693c454e8a0408b885d50c77"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "YorumUpdate",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "author",
+							"value": "Şahin",
+							"type": "text"
+						},
+						{
+							"key": "rating",
+							"value": "3",
+							"type": "text"
+						},
+						{
+							"key": "text",
+							"value": "Tatlıların Sevgisi Kalmamış",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mekan-bul-theta.vercel.app/api/venues/69283a92167d5f9a263022e3/comments/693c454e8a0408b885d50c77",
+					"protocol": "https",
+					"host": [
+						"mekan-bul-theta",
+						"vercel",
+						"app"
+					],
+					"path": [
+						"api",
+						"venues",
+						"69283a92167d5f9a263022e3",
+						"comments",
+						"693c454e8a0408b885d50c77"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
