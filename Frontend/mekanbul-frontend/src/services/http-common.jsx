@@ -20,6 +20,6 @@ export default axios.create({
     // Gönderilen verinin formatını belirtir
     // application/x-www-form-urlencoded: Form verileri için kullanılır
     // charset=UTF-8: Türkçe karakter desteği için
-    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+    "Content-Type": "application/json",
   },
 });
