@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import VenueDataService from "../services/VenueDataService";
 import { useDispatch } from "react-redux";
-import Modal from "./Modal"; 
+import Modal from "./Modal";
 
 function AddComment() {
   const { id } = useParams();
@@ -11,44 +11,53 @@ function AddComment() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Modal'ın açık/kapalı durumunu tutan state
   const [showModal, setShowModal] = useState(false);
+  // Butona basıldığında yükleniyor durumu
+  const [submitting, setSubmitting] = useState(false); 
 
-  // Modal kapatılınca çalışacak fonksiyon
   const handleModalClose = () => {
     setShowModal(false);
-    navigate(`/venue/${id}`); 
+    navigate(`/venue/${id}`);
   };
 
   const onSubmit = (evt) => {
     evt.preventDefault();
-    if (
-      evt.target.elements.author.value &&
-      evt.target.elements.text.value &&
-      evt.target.elements.rating.value
-    ) {
+    
+    // Form elemanlarını al
+    const author = evt.target.elements.author.value;
+    const text = evt.target.elements.text.value;
+    const rating = evt.target.elements.rating.value;
+
+    if (author && text && rating) {
+      // Butonu devre dışı bırak (Tıklanmaz yap)
+      setSubmitting(true);
+
       let newComment = {
-        author: evt.target.elements.author.value,
-        text: evt.target.elements.text.value,
-        rating: evt.target.elements.rating.value,
+        author: author,
+        text: text,
+        rating: rating,
       };
 
       VenueDataService.addComment(id, newComment)
         .then(() => {
           dispatch({ type: "ADD_COMMENT_SUCCESS" });
-          // Yorum başarılıysa Modal'ı aç
+          // İşlem bitti, Modal'ı aç
           setShowModal(true); 
         })
         .catch(() => {
           dispatch({ type: "ADD_COMMENT_FAILURE" });
+          setSubmitting(false); 
+          alert("Yorum eklenirken bir hata oluştu.");
         });
+    } else {
+        alert("Lütfen tüm alanları doldurunuz.");
     }
   };
 
   return (
     <>
-      <Header headerText={location.state.name} motto=" mekanına yorum yap" />
-
+      <Header headerText={location.state ? location.state.name : "Mekan"} motto=" mekanına yorum yap" />
+      
       <Modal
         show={showModal}
         onClose={handleModalClose}
@@ -71,6 +80,7 @@ function AddComment() {
                   className="form-control"
                   id="author"
                   name="author"
+                  disabled={submitting}
                 />
               </div>
             </div>
@@ -81,7 +91,8 @@ function AddComment() {
                   className="form-control input-sm"
                   id="rating"
                   name="rating"
-                >
+                  disabled={submitting}
+                > 
                   <option>5</option>
                   <option>4</option>
                   <option>3</option>
@@ -97,10 +108,13 @@ function AddComment() {
                   className="review form-control"
                   name="text"
                   rows={5}
+                  disabled={submitting}
                 />
               </div>
             </div>
-            <button className="btn btn-default pull-right">Yorum Ekle</button>
+            <button className="btn btn-default pull-right" disabled={submitting}>
+              {submitting ? "Gönderiliyor..." : "Yorum Ekle"}
+            </button>
           </form>
         </div>
       </div>
