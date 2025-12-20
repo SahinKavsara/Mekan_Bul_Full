@@ -1,11 +1,13 @@
 import http from "./http-common";
 
 const register = (data) => {
-  return http.post("/register", data);
+  // Backend'de yol '/users/register' olduğu için burayı güncelledik
+  return http.post("/users/register", data);
 };
 
 const login = (data) => {
-  return http.post("/login", data);
+  // Backend'de yol '/users/login' olduğu için burayı güncelledik
+  return http.post("/users/login", data);
 };
 
 const AuthService = {
