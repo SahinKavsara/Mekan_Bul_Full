@@ -6,9 +6,9 @@ import AuthService from "../services/AuthService";
 const Register = () => {
   const navigate = useNavigate();
   
-  // Form verilerini tutacak state
+  // DÜZELTME 1: State ismini 'name' yerine 'username' yaptık (Backend ile uyumlu olsun diye)
   const [formData, setFormData] = useState({
-    name: "",
+    username: "", 
     email: "",
     password: ""
   });
@@ -25,19 +25,22 @@ const Register = () => {
   const handleRegister = (e) => {
     e.preventDefault();
     setMessage("");
+    
+    // Konsola yazdıralım ki çalıştığını görelim (F12 Console'a bakabilirsin)
+    console.log("Kayıt işlemi başlatılıyor...", formData);
 
     AuthService.register(formData)
       .then((response) => {
-        // Kayıt başarılıysa Login sayfasına yönlendir
+        console.log("Kayıt başarılı:", response); // Başarılı olursa log düşsün
         alert("Kayıt Başarılı! Giriş yapabilirsiniz.");
         navigate("/login");
       })
       .catch((error) => {
-        // Hata varsa mesaj göster
+        console.error("Kayıt hatası:", error); // Hata olursa log düşsün
         const resMessage =
           (error.response &&
             error.response.data &&
-            error.response.data.mesaj) ||
+            error.response.data.mesaj) || // Backend'den gelen hata mesajı
           error.message ||
           error.toString();
 
@@ -57,12 +60,12 @@ const Register = () => {
               )}
               
               <div className="form-group">
-                <label>Ad Soyad:</label>
+                <label>Ad Soyad (Kullanıcı Adı):</label>
                 <input
                   type="text"
                   className="form-control"
-                  name="name"
-                  value={formData.name}
+                  name="username" /* DÜZELTME 2: name="name" yerine name="username" */
+                  value={formData.username} /* DÜZELTME 3: formData.name yerine formData.username */
                   onChange={handleChange}
                   required
                 />
@@ -92,7 +95,8 @@ const Register = () => {
                 />
               </div>
 
-              <button className="btn btn-primary pull-right">Kayıt Ol</button>
+              
+              <button type="submit" className="btn btn-primary pull-right">Kayıt Ol</button>
             </form>
           </div>
         </div>
