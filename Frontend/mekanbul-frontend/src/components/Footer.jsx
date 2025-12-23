@@ -4,7 +4,7 @@ function Footer() {
     <footer>
       {/* Telif hakkı sembolü ve yıl bilgisi */}
       {/* &copy; = © (copyright) sembolü */}
-      <small>&copy; Asım Sinan Yüksel 2025</small>{" "}
+      <small>&copy; Şahin KAVSARA 2025</small>{" "}
     </footer>
   );
 }
