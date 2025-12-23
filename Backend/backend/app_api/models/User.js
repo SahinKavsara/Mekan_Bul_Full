@@ -1,28 +1,49 @@
-const mongoose = require('mongoose');
+var mongoose = require( 'mongoose' );
+var crypto = require('crypto');
+var jwt = require('jsonwebtoken');
 
-// Kullanıcı Şeması (Schema) Oluşturuluyor
-const UserSchema = new mongoose.Schema({
-  username: {
+// Kullanıcı Şeması
+var userSchema = new mongoose.Schema({
+  name: { // Frontend 'name' yolluyor, o yüzden burayı name yaptık
     type: String,
-    required: true, // Bu alan zorunlu
-    trim: true      // Başındaki/sonundaki boşlukları otomatik siler
+    required: true,
+    trim: true
   },
   email: {
     type: String,
+    unique: true,
     required: true,
-    unique: true,   // Aynı e-posta ile ikinci kayıt yapılamaz
-    trim: true,
-    lowercase: true // E-postayı hep küçük harfe çevirir
+    lowercase: true, 
+    trim: true
   },
-  password: {
-    type: String,
-    required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now // Kayıt anındaki tarihi otomatik atar
-  }
+  // Şifreyi açık (plain text) saklamıyoruz! Hash ve Salt kullanıyoruz.
+  hash: String,
+  salt: String
 });
 
-// Modeli dışarı aktarıyoruz
-module.exports = mongoose.model('user', UserSchema);
+// Şifreyi şifreleyerek (Hash+Salt) kaydetme metodu
+userSchema.methods.setPassword = function(password){
+  this.salt = crypto.randomBytes(16).toString('hex');
+  this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
+};
+
+// Giriş yaparken şifre doğru mu kontrol etme metodu
+userSchema.methods.validPassword = function(password) {
+  var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
+  return this.hash === hash;
+};
+
+// Token (JWT) üretme metodu
+userSchema.methods.generateJwt = function() {
+  var expiry = new Date();
+  expiry.setDate(expiry.getDate() + 7); // Token 7 gün geçerli olsun
+
+  return jwt.sign({
+    _id: this._id,
+    email: this.email,
+    name: this.name,
+    exp: parseInt(expiry.getTime() / 1000), // Son kullanma tarihi
+  }, process.env.JWT_SECRET); // Vercel'e eklediğimiz gizli anahtar
+};
+
+mongoose.model('user', userSchema);
