@@ -6,9 +6,9 @@ import AuthService from "../services/AuthService";
 const Register = () => {
   const navigate = useNavigate();
   
-  // DÜZELTME 1: State ismini 'name' yerine 'username' yaptık (Backend ile uyumlu olsun diye)
+  // DÜZELTME: Backend 'name' beklediği için burayı tekrar 'name' yaptık
   const [formData, setFormData] = useState({
-    username: "", 
+    name: "", 
     email: "",
     password: ""
   });
@@ -26,21 +26,21 @@ const Register = () => {
     e.preventDefault();
     setMessage("");
     
-    // Konsola yazdıralım ki çalıştığını görelim (F12 Console'a bakabilirsin)
     console.log("Kayıt işlemi başlatılıyor...", formData);
 
     AuthService.register(formData)
       .then((response) => {
-        console.log("Kayıt başarılı:", response); // Başarılı olursa log düşsün
+        console.log("Kayıt başarılı:", response);
         alert("Kayıt Başarılı! Giriş yapabilirsiniz.");
         navigate("/login");
       })
       .catch((error) => {
-        console.error("Kayıt hatası:", error); // Hata olursa log düşsün
+        console.error("Kayıt hatası:", error);
         const resMessage =
           (error.response &&
             error.response.data &&
-            error.response.data.mesaj) || // Backend'den gelen hata mesajı
+            error.response.data.mesaj) || // Backend bazen 'mesaj' bazen 'message' dönebilir
+           (error.response && error.response.data && error.response.data.message) ||
           error.message ||
           error.toString();
 
@@ -60,12 +60,12 @@ const Register = () => {
               )}
               
               <div className="form-group">
-                <label>Ad Soyad (Kullanıcı Adı):</label>
+                <label>Ad Soyad:</label>
                 <input
                   type="text"
                   className="form-control"
-                  name="username" /* DÜZELTME 2: name="name" yerine name="username" */
-                  value={formData.username} /* DÜZELTME 3: formData.name yerine formData.username */
+                  name="name"      // DÜZELTME: Burası 'name' olmalı
+                  value={formData.name} // DÜZELTME: Burası 'name' olmalı
                   onChange={handleChange}
                   required
                 />
@@ -95,7 +95,6 @@ const Register = () => {
                 />
               </div>
 
-              
               <button type="submit" className="btn btn-primary pull-right">Kayıt Ol</button>
             </form>
           </div>
