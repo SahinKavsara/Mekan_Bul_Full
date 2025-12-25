@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import Header from "./Header";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../services/AuthService";
+import VenueDataService from "../services/VenueDataService"; 
 
 const Register = () => {
   const navigate = useNavigate();
   
-  // DÜZELTME: Backend 'name' beklediği için burayı tekrar 'name' yaptık
   const [formData, setFormData] = useState({
     name: "", 
     email: "",
@@ -26,24 +25,22 @@ const Register = () => {
     e.preventDefault();
     setMessage("");
     
-    console.log("Kayıt işlemi başlatılıyor...", formData);
+    // Basit doğrulama
+    if (!formData.name || !formData.email || !formData.password) {
+        setMessage("Lütfen tüm alanları doldurunuz.");
+        return;
+    }
 
-    AuthService.register(formData)
+    VenueDataService.register(formData.name, formData.email, formData.password)
       .then((response) => {
-        console.log("Kayıt başarılı:", response);
         alert("Kayıt Başarılı! Giriş yapabilirsiniz.");
         navigate("/login");
       })
       .catch((error) => {
         console.error("Kayıt hatası:", error);
         const resMessage =
-          (error.response &&
-            error.response.data &&
-            error.response.data.mesaj) || // Backend bazen 'mesaj' bazen 'message' dönebilir
            (error.response && error.response.data && error.response.data.message) ||
-          error.message ||
-          error.toString();
-
+           "Kayıt işlemi başarısız. (Bu e-posta kullanılıyor olabilir)";
         setMessage(resMessage);
       });
   };
@@ -54,48 +51,63 @@ const Register = () => {
       <div className="container">
         <div className="row">
           <div className="col-xs-12 col-md-6 col-md-offset-3">
-            <form onSubmit={handleRegister}>
+            <form className="form-horizontal" onSubmit={handleRegister}>
               {message && (
                 <div className="alert alert-danger">{message}</div>
               )}
               
               <div className="form-group">
-                <label>Ad Soyad:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="name"      // DÜZELTME: Burası 'name' olmalı
-                  value={formData.name} // DÜZELTME: Burası 'name' olmalı
-                  onChange={handleChange}
-                  required
-                />
+                <label className="col-sm-2 control-label">Ad Soyad:</label>
+                <div className="col-sm-10">
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="name"
+                    placeholder="Adınızı ve Soyadınızı giriniz"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
               </div>
 
               <div className="form-group">
-                <label>Email:</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
+                <label className="col-sm-2 control-label">Email:</label>
+                <div className="col-sm-10">
+                  <input
+                    type="email"
+                    className="form-control"
+                    name="email"
+                    placeholder="E-postanızı giriniz"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
               </div>
 
               <div className="form-group">
-                <label>Şifre:</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
+                <label className="col-sm-2 control-label">Şifre:</label>
+                <div className="col-sm-10">
+                  <input
+                    type="password"
+                    className="form-control"
+                    name="password"
+                    placeholder="Şifrenizi belirleyiniz"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
               </div>
 
-              <button type="submit" className="btn btn-primary pull-right">Kayıt Ol</button>
+              <div className="form-group">
+                <div className="col-sm-offset-2 col-sm-10">
+                    <button type="submit" className="btn btn-default pull-right">
+                        Kayıt Ol
+                    </button>
+                </div>
+              </div>
             </form>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Header from "./Header";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../services/AuthService";
+import VenueDataService from "../services/VenueDataService"; // AuthService yerine bunu kullanıyoruz
 
 const Login = () => {
   const navigate = useNavigate();
@@ -24,25 +24,26 @@ const Login = () => {
     e.preventDefault();
     setMessage("");
 
-    AuthService.login(formData)
+    if (!formData.email || !formData.password) {
+      setMessage("Lütfen tüm alanları doldurunuz.");
+      return;
+    }
+
+    VenueDataService.login(formData.email, formData.password)
       .then((response) => {
         if (response.data.token) {
-          // TOKEN'I TARAYICIYA KAYDET (İşte burası kilit nokta)
+          // Token'ı kaydet
           localStorage.setItem("user", JSON.stringify(response.data));
           
-          alert("Giriş Başarılı!");
-          navigate("/"); // Ana sayfaya yönlendir
-          window.location.reload(); // Sayfayı yenile ki Header güncellensin
+          // Header güncellensin diye sayfayı yenileyerek anasayfaya git
+          window.location.href = "/"; 
         }
       })
       .catch((error) => {
+        // Hata mesajını yakala
         const resMessage =
-          (error.response &&
-            error.response.data &&
-            error.response.data.mesaj) ||
-          error.message ||
-          error.toString();
-
+          (error.response && error.response.data && error.response.data.message) ||
+          "Giriş başarısız. E-posta veya şifre hatalı.";
         setMessage(resMessage);
       });
   };
@@ -53,36 +54,59 @@ const Login = () => {
       <div className="container">
         <div className="row">
           <div className="col-xs-12 col-md-6 col-md-offset-3">
-            <form onSubmit={handleLogin}>
+            <form className="form-horizontal" onSubmit={handleLogin}>
               {message && (
                 <div className="alert alert-danger">{message}</div>
               )}
 
               <div className="form-group">
-                <label>Email:</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
+                <label className="col-sm-2 control-label">E-Posta:</label>
+                <div className="col-sm-10">
+                  <input
+                    type="email"
+                    className="form-control"
+                    name="email"
+                    placeholder="E-postanızı giriniz"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
               </div>
 
               <div className="form-group">
-                <label>Şifre:</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
+                <label className="col-sm-2 control-label">Şifre:</label>
+                <div className="col-sm-10">
+                  <input
+                    type="password"
+                    className="form-control"
+                    name="password"
+                    placeholder="Şifrenizi giriniz"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
               </div>
 
-              <button className="btn btn-primary pull-right">Giriş Yap</button>
+              <div className="form-group">
+                <div className="col-sm-offset-2 col-sm-10">
+                  {/* Kayıt Ol butonu (Sadece yönlendirme yapar) */}
+                  <button
+                    type="button"
+                    className="btn btn-default pull-left"
+                    onClick={() => navigate("/register")}
+                    style={{ color: "#d9534f" }} // Kırmızı renk
+                  >
+                    Kayıt Ol
+                  </button>
+                  
+                  {/* Giriş Yap butonu */}
+                  <button type="submit" className="btn btn-default pull-right">
+                    Giriş Yap
+                  </button>
+                </div>
+              </div>
             </form>
           </div>
         </div>
