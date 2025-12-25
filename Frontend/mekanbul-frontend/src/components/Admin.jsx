@@ -15,7 +15,7 @@ function Admin() {
           getVenues(position.coords.latitude, position.coords.longitude);
         },
         () => {
-          setError("Konum alınamadı. Varsayılan konum kullanılıyor.");
+          console.log("Konum alınamadı, varsayılan konum kullanılıyor.");
           getVenues(37.77, 30.55);
         }
       );
@@ -27,16 +27,32 @@ function Admin() {
   const getVenues = (lat, long) => {
     VenueDataService.nearbyVenues(lat, long)
       .then((response) => {
+        // --- DEDEKTİF MODU BAŞLANGIÇ ---
+        console.log("BACKEND'DEN GELEN VERİ:", response.data);
+        if (response.data.length > 0) {
+            console.log("İlk mekanın ID durumu:", "id:", response.data[0].id, "_id:", response.data[0]._id);
+        }
+        // --------------------------------
         setVenues(response.data);
       })
       .catch((e) => {
-        console.log(e);
+        console.error(e);
         setError("Mekanlar getirilirken hata oluştu.");
       });
   };
 
-  const handleDelete = async (id, name) => {
-    if (window.confirm(`${name} mekanını gerçekten silmek istiyor musunuz?`)) {
+  const handleDelete = async (venue) => {
+    // BURASI ÇOK ÖNEMLİ: Hem id'ye hem _id'ye bakıyoruz!
+    const venueId = venue.id || venue._id;
+
+    console.log("Silinecek ID:", venueId); // Konsola yazalım, undefined mi görelim
+
+    if (!venueId) {
+        alert("HATA: Mekan ID'si bulunamadı! Konsolu (F12) kontrol edin.");
+        return;
+    }
+
+    if (window.confirm(`${venue.name} mekanını gerçekten silmek istiyor musunuz?`)) {
       try {
          const user = JSON.parse(localStorage.getItem("user"));
          if (!user || !user.token) {
@@ -44,15 +60,14 @@ function Admin() {
             return;
          }
 
-         // Backend 'auth' ile korunuyor, token gönderiyoruz
-         await VenueDataService.removeVenue(id, user.token);
+         await VenueDataService.removeVenue(venueId, user.token);
          
-         // Listeden silineni çıkar (Burada _id kullanıyoruz)
-         setVenues(venues.filter(venue => venue._id !== id));
+         // Listeden silineni çıkarırken de aynı kontrolü yapıyoruz
+         setVenues(venues.filter(v => (v.id || v._id) !== venueId));
          alert("Mekan başarıyla silindi!");
 
       } catch (error) {
-         console.error(error);
+         console.error("Silme Hatası:", error);
          alert("Silinirken bir hata oluştu! (Yetkiniz olmayabilir)");
       }
     }
@@ -91,32 +106,34 @@ function Admin() {
                             </tr>
                         </thead>
                         <tbody>
-                            {venues.map((venue) => (
-                                /* DÜZELTME: venue._id kullanıyoruz */
-                                <tr key={venue._id}>
-                                    <td>{venue.name}</td>
-                                    <td>{venue.address}</td>
-                                    <td>{venue.rating}</td>
-                                    <td style={{textAlign: "right"}}>
-                                        <button 
-                                            className="btn btn-info btn-xs" 
-                                            style={{ marginRight: "5px" }}
-                                            /* DÜZELTME: venue._id */
-                                            onClick={() => navigate(`/admin/update/${venue._id}`)}
-                                        >
-                                            Güncelle
-                                        </button>
-                                        
-                                        <button 
-                                            className="btn btn-danger btn-xs"
-                                            /* DÜZELTME: venue._id */
-                                            onClick={() => handleDelete(venue._id, venue.name)}
-                                        >
-                                            Sil
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                            {venues.map((venue) => {
+                                // Satır içinde değişkeni tanımla
+                                const currentId = venue.id || venue._id;
+                                return (
+                                    <tr key={currentId}>
+                                        <td>{venue.name}</td>
+                                        <td>{venue.address}</td>
+                                        <td>{venue.rating}</td>
+                                        <td style={{textAlign: "right"}}>
+                                            <button 
+                                                className="btn btn-info btn-xs" 
+                                                style={{ marginRight: "5px" }}
+                                                onClick={() => navigate(`/admin/update/${currentId}`)}
+                                            >
+                                                Güncelle
+                                            </button>
+                                            
+                                            <button 
+                                                className="btn btn-danger btn-xs"
+                                                // Fonksiyona tüm venue objesini gönderiyoruz ki ID'yi kendi bulsun
+                                                onClick={() => handleDelete(venue)}
+                                            >
+                                                Sil
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
