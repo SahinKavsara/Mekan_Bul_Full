@@ -95,6 +95,11 @@ const getVenue = async function (req, res) {
 
 const updateVenue = async function (req, res) {
     try {
+
+        if (!req.payload.isAdmin) {
+             return createResponse(res, 403, { "status": "Yetkiniz yok! Sadece Adminler güncelleyebilir." });
+        }
+
         const updatedVenue = await Venue.findByIdAndUpdate(
             req.params.venueid,
             {
@@ -126,6 +131,10 @@ const updateVenue = async function (req, res) {
 
 const deleteVenue = async function (req, res) {
     try {
+
+        if (!req.payload.isAdmin) {
+             return createResponse(res, 403, { "status": "Yetkiniz yok! Sadece Adminler silebilir." });
+        }
         // 1. Mekanı bul ve sil
         const venue = await Venue.findByIdAndDelete(req.params.venueid);
 

@@ -16,6 +16,11 @@ var userSchema = new mongoose.Schema({
     lowercase: true, 
     trim: true
   },
+
+  isAdmin: {         // <-- YENİ EKLENEN KISIM
+    type: Boolean,
+    default: false
+  },
   // Şifreyi açık (plain text) saklamıyoruz! Hash ve Salt kullanıyoruz.
   hash: String,
   salt: String
@@ -42,6 +47,7 @@ userSchema.methods.generateJwt = function() {
     _id: this._id,
     email: this.email,
     name: this.name,
+    isAdmin: this.isAdmin,
     exp: parseInt(expiry.getTime() / 1000), // Son kullanma tarihi
   }, process.env.JWT_SECRET); // Vercel'e eklediğimiz gizli anahtar
 };

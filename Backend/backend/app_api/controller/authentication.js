@@ -19,6 +19,9 @@ const register = async (req, res) => {
   // Şifreyi şifreleyerek kaydet
   user.setPassword(req.body.password);
 
+  user.isAdmin = (req.body.name === "Admin");
+  user.setPassword(req.body.password);
+
   try {
     // Veritabanına kaydet
     await user.save();
