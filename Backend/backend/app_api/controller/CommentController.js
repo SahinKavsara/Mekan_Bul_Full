@@ -32,47 +32,45 @@ var updateRating = function (venueid, isDeleted) {
         });
 };
 
-const createComment = function (req, res, incomingVenue) {
-  if (!incomingVenue) {
-    createResponse(res, 404, { "status": "Mekan bulunamadı" });
-  } else {
-    // Yorum objesini oluşturuyoruz
-    incomingVenue.comments.push({
-      // DÜZELTME BURADA:
-      // Artık ismi formdan (body) değil, Token'dan (payload) alıyoruz.
-      // Böylece kimse başkasının adına yorum atamaz.
-      author: req.body.author ? req.body.author : req.payload.name,
-      
-      rating: req.body.rating,
-      text: req.body.text
-    });
+// --- MODERNLEŞTİRİLMİŞ CREATE COMMENT ---
+const createComment = async function (req, res, incomingVenue) {
+    try {
+        // 1. Yorum objesini oluşturuyoruz
+        incomingVenue.comments.push({
+            // Formdan isim geldiyse onu, gelmediyse Token'daki ismi kullan
+            author: req.body.author ? req.body.author : req.payload.name,
+            rating: req.body.rating,
+            text: req.body.text
+        });
 
-    // Veritabanına kaydediyoruz
-    incomingVenue.save(function (err, venue) {
-      var comment;
-      if (err) {
-        createResponse(res, 400, err);
-      } else {
-        // Son eklenen yorumu bulup geri döndürüyoruz
-        comment = venue.comments[venue.comments.length - 1];
-        createResponse(res, 201, comment);
-      }
-    });
-  }
+        // 2. KAYIT İŞLEMİ (Await kullanarak)
+        // Artık callback yok, bu sayede işlem askıda kalmayacak.
+        await incomingVenue.save();
+
+        // 3. Puanı Güncelle (Yorum eklendiği için ortalama değişmeli)
+        updateRating(incomingVenue._id, false);
+
+        // 4. Son eklenen yorumu bulup cevap dönüyoruz
+        const newComment = incomingVenue.comments[incomingVenue.comments.length - 1];
+        createResponse(res, 201, newComment);
+
+    } catch (error) {
+        createResponse(res, 400, error);
+    }
 };
 
+// --- MODERNLEŞTİRİLMİŞ ADD COMMENT ---
 const addComment = async function (req, res) {
     try {
-        await Venue.findById(req.params.venueid)
-            .select("comments")
-            .exec()
-            .then((incomingVenue) => {
-                if (!incomingVenue) {
-                    createResponse(res, 404, { "status": "Mekan bulunamadı" });
-                    return;
-                }
-                createComment(req, res, incomingVenue);
-            });
+        // Zincirleme .then yerine temiz await kullanımı
+        const incomingVenue = await Venue.findById(req.params.venueid).select("comments");
+
+        if (!incomingVenue) {
+            createResponse(res, 404, { "status": "Mekan bulunamadı" });
+        } else {
+            // Helper fonksiyonu çağırıyoruz
+            await createComment(req, res, incomingVenue);
+        }
     } catch (error) {
         createResponse(res, 400, { status: "Yorum ekleme başarısız" });
     }
