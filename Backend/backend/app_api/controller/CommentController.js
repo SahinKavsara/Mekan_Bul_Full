@@ -41,7 +41,7 @@ const createComment = function (req, res, incomingVenue) {
       // DÜZELTME BURADA:
       // Artık ismi formdan (body) değil, Token'dan (payload) alıyoruz.
       // Böylece kimse başkasının adına yorum atamaz.
-      author: req.payload.name, 
+      author: req.body.author ? req.body.author : req.payload.name,
       
       rating: req.body.rating,
       text: req.body.text
