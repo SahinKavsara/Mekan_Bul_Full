@@ -5,35 +5,49 @@ import { useNavigate } from "react-router-dom";
 
 function Admin() {
   const [venues, setVenues] = useState([]);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Sayfa açılınca mekanları getir (Şimdilik Isparta koordinatları ile)
   useEffect(() => {
-    VenueDataService.nearbyVenues(37.77, 30.55) // Koordinatları kendi bölgende tutabilirsin
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          getVenues(position.coords.latitude, position.coords.longitude);
+        },
+        () => {
+          setError("Konum alınamadı. Varsayılan konum kullanılıyor.");
+          getVenues(37.77, 30.55);
+        }
+      );
+    } else {
+      getVenues(37.77, 30.55);
+    }
+  }, []);
+
+  const getVenues = (lat, long) => {
+    VenueDataService.nearbyVenues(lat, long)
       .then((response) => {
         setVenues(response.data);
       })
       .catch((e) => {
         console.log(e);
+        setError("Mekanlar getirilirken hata oluştu.");
       });
-  }, []);
+  };
 
   const handleDelete = async (id, name) => {
-    // 1. Kullanıcıdan onay al
     if (window.confirm(`${name} mekanını gerçekten silmek istiyor musunuz?`)) {
       try {
-         // 2. Token'ı al (Güvenlik için şart)
          const user = JSON.parse(localStorage.getItem("user"));
          if (!user || !user.token) {
             alert("Silme işlemi için giriş yapmalısınız!");
             return;
          }
 
-         // 3. Backend'e silme isteği gönder
          await VenueDataService.removeVenue(id, user.token);
          
-         // 4. Başarılı olursa listeyi güncelle (Silineni ekrandan kaldır)
-         setVenues(venues.filter(venue => venue._id !== id));
+         // Listeden silineni çıkar (Burada da venue.id kullanıyoruz)
+         setVenues(venues.filter(venue => venue.id !== id));
          alert("Mekan başarıyla silindi!");
 
       } catch (error) {
@@ -51,7 +65,6 @@ function Admin() {
         <div className="row">
           <div className="col-xs-12">
             
-            {/* Yeni Mekan Ekle Butonu */}
             <div style={{ marginBottom: "20px", textAlign: "right" }}>
               <button 
                 className="btn btn-success"
@@ -61,7 +74,8 @@ function Admin() {
               </button>
             </div>
 
-            {/* Mekan Listesi Tablosu */}
+            {error && <div className="alert alert-danger">{error}</div>}
+
             {venues.length > 0 ? (
               <div className="panel panel-primary">
                 <div className="panel-heading">Mekan Listesi</div>
@@ -77,24 +91,25 @@ function Admin() {
                         </thead>
                         <tbody>
                             {venues.map((venue) => (
-                                <tr key={venue._id}>
+                                /* DÜZELTME 1: key={venue.id} oldu (_id değil) */
+                                <tr key={venue.id}>
                                     <td>{venue.name}</td>
                                     <td>{venue.address}</td>
                                     <td>{venue.rating}</td>
                                     <td style={{textAlign: "right"}}>
-                                        {/* Güncelle Butonu */}
                                         <button 
                                             className="btn btn-info btn-xs" 
                                             style={{ marginRight: "5px" }}
-                                            onClick={() => navigate(`/admin/update/${venue._id}`)}
+                                            /* DÜZELTME 2: venue.id kullanıldı */
+                                            onClick={() => navigate(`/admin/update/${venue.id}`)}
                                         >
                                             Güncelle
                                         </button>
                                         
-                                        {/* Sil Butonu */}
                                         <button 
                                             className="btn btn-danger btn-xs"
-                                            onClick={() => handleDelete(venue._id, venue.name)}
+                                            /* DÜZELTME 3: venue.id kullanıldı */
+                                            onClick={() => handleDelete(venue.id, venue.name)}
                                         >
                                             Sil
                                         </button>
@@ -106,7 +121,9 @@ function Admin() {
                 </div>
               </div>
             ) : (
-              <div className="alert alert-warning">Hiç mekan bulunamadı.</div>
+              <div className="alert alert-warning">
+                 {error ? "Hata oluştu." : "Hiç mekan bulunamadı."}
+              </div>
             )}
 
           </div>
