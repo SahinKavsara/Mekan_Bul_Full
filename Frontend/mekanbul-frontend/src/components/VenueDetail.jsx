@@ -4,7 +4,6 @@ import Header from "./Header";
 import HourList from "./HourList";
 import CommentList from "./CommentList";
 import React from "react";
-// DÜZELTME 1: NavLink yerine useNavigate'i ekledik
 import { useParams, useNavigate } from "react-router-dom"; 
 import { useSelector, useDispatch } from "react-redux";
 import VenueDataService from "../services/VenueDataService";
@@ -12,7 +11,6 @@ import VenueDataService from "../services/VenueDataService";
 const VenueDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  // DÜZELTME 2: Yönlendirme fonksiyonunu tanımladık
   const navigate = useNavigate(); 
 
   const {
@@ -33,17 +31,20 @@ const VenueDetail = () => {
       });
   }, [id, dispatch]);
 
-  // DÜZELTME 3: Butona tıklanınca çalışacak "Güvenlik Kontrolü" fonksiyonu
-  const handleAddCommentClick = () => {
-    // 1. Tarayıcı hafızasına bak
+  // --- GÜVENLİK KONTROLÜ FONKSİYONU ---
+  const handleAddCommentClick = (e) => {
+    e.preventDefault(); // Varsayılan davranışı engelle
+    
+    // 1. Kullanıcı var mı kontrol et
     const user = localStorage.getItem("user");
+    console.log("Butona tıklandı. Kullanıcı durumu:", user); // F12 Konsolunda görünür
 
     if (!user) {
-      // 2. Kimse yoksa uyar ve Login'e postala
+      // 2. Kullanıcı YOKSA -> Login Sayfasına git
       alert("Yorum yapmak için lütfen önce giriş yapınız.");
       navigate("/login");
     } else {
-      // 3. Giriş yapılmışsa Yorum sayfasına gönder (Mekan ismini de taşıyarak)
+      // 3. Kullanıcı VARSA -> Yorum Ekleme Sayfasına git
       navigate(`/venue/${id}/comment/new`, { state: { name: venue.name } });
     }
   };
@@ -132,13 +133,15 @@ const VenueDetail = () => {
                       <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <h2 className="panel-title" style={{ margin: 0 }}>Yorumlar</h2>
                         
-                        {/* DÜZELTME 4: NavLink'i sildik, yerine akıllı 'button' koyduk */}
+                        {/* --- BUTON GÜNCELLEMESİ --- */}
                         <button
-                          className="btn btn-default btn-xs"
+                          className="btn btn-primary btn-xs" // Rengi mavi yaptım (farkı gör diye)
                           onClick={handleAddCommentClick}
                         >
                           Yorum Ekle
                         </button>
+                        {/* ------------------------- */}
+                        
                       </div>
 
                       <div className="panel-body ">
