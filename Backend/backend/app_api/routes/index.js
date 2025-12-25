@@ -38,7 +38,6 @@ router
 router
   .route("/venues/:venueid")
   .get(venueController.getVenue)
-  // Güncelleme ve Silme işlemlerine 'auth' ekledik
   .put(auth, venueController.updateVenue) 
   .delete(auth, venueController.deleteVenue);
 

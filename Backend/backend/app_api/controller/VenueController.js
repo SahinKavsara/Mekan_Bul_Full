@@ -131,22 +131,36 @@ const updateVenue = async function (req, res) {
 
 const deleteVenue = async function (req, res) {
     try {
+        console.log("---------------- SİLME İŞLEMİ LOGLARI ----------------");
+        console.log("1. Silinmek istenen ID:", req.params.venueid);
+        
+        // KONTROL 1: Kullanıcı verisi hangi kutuda gelmiş?
+        console.log("2. req.payload durumu:", req.payload);
+        console.log("3. req.auth durumu (Yeni versiyonlar bunu kullanır):", req.auth);
+        
+        // Hangi kutu doluysa onu kullanalım (Fallback mekanizması)
+        const currentUser = req.payload || req.auth;
 
-        if (!req.payload.isAdmin) {
+        if (!currentUser) {
+            console.log("HATA: Kullanıcı verisi (Token) okunamadı! Middleware çalışmadı veya header gelmedi.");
+            return createResponse(res, 401, { "status": "Token bulunamadı veya çözülemedi." });
+        }
+
+        if (!currentUser.isAdmin) {
+             console.log("HATA: Kullanıcı Admin değil. Kullanıcı Adı:", currentUser.name);
              return createResponse(res, 403, { "status": "Yetkiniz yok! Sadece Adminler silebilir." });
         }
-        // 1. Mekanı bul ve sil
-        const venue = await Venue.findByIdAndDelete(req.params.venueid);
 
-        // 2. Eğer mekan bulunduysa ve silindiyse
+        const venue = await Venue.findByIdAndDelete(req.params.venueid);
         if (venue) {
+            console.log("BAŞARILI: Mekan silindi.");
             createResponse(res, 200, { status: venue.name + " isimli mekan silindi." });
         } else {
-            // Mekan yoksa hata dön
+            console.log("HATA: Veritabanında bu ID ile mekan bulunamadı.");
             createResponse(res, 404, { status: "Böyle bir mekan bulunamadı!" });
         }
     } catch (error) {
-        // ID formatı hatalıysa veya başka sorun varsa
+        console.log("BEKLENMEDİK HATA:", error);
         createResponse(res, 400, { status: "Silme işlemi başarısız.", error });
     }
 };
