@@ -44,10 +44,11 @@ function Admin() {
             return;
          }
 
+         // Backend 'auth' ile korunuyor, token gönderiyoruz
          await VenueDataService.removeVenue(id, user.token);
          
-         // Listeden silineni çıkar (Burada da venue.id kullanıyoruz)
-         setVenues(venues.filter(venue => venue.id !== id));
+         // Listeden silineni çıkar (Burada _id kullanıyoruz)
+         setVenues(venues.filter(venue => venue._id !== id));
          alert("Mekan başarıyla silindi!");
 
       } catch (error) {
@@ -91,8 +92,8 @@ function Admin() {
                         </thead>
                         <tbody>
                             {venues.map((venue) => (
-                                /* DÜZELTME 1: key={venue.id} oldu (_id değil) */
-                                <tr key={venue.id}>
+                                /* DÜZELTME: venue._id kullanıyoruz */
+                                <tr key={venue._id}>
                                     <td>{venue.name}</td>
                                     <td>{venue.address}</td>
                                     <td>{venue.rating}</td>
@@ -100,16 +101,16 @@ function Admin() {
                                         <button 
                                             className="btn btn-info btn-xs" 
                                             style={{ marginRight: "5px" }}
-                                            /* DÜZELTME 2: venue.id kullanıldı */
-                                            onClick={() => navigate(`/admin/update/${venue.id}`)}
+                                            /* DÜZELTME: venue._id */
+                                            onClick={() => navigate(`/admin/update/${venue._id}`)}
                                         >
                                             Güncelle
                                         </button>
                                         
                                         <button 
                                             className="btn btn-danger btn-xs"
-                                            /* DÜZELTME 3: venue.id kullanıldı */
-                                            onClick={() => handleDelete(venue.id, venue.name)}
+                                            /* DÜZELTME: venue._id */
+                                            onClick={() => handleDelete(venue._id, venue.name)}
                                         >
                                             Sil
                                         </button>
