@@ -1,5 +1,5 @@
 import Header from "./Header";
-import React, { useState, useEffect } from "react"; // useEffect eklendi
+import React, { useState, useEffect } from "react"; 
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import VenueDataService from "../services/VenueDataService";
 import { useDispatch } from "react-redux";
@@ -11,37 +11,38 @@ function AddComment() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Kullanıcı bilgisini State'te tutalım
+  // Kullanıcı bilgisini tutacak state
   const [user, setUser] = useState(null);
 
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // SAYFA YÜKLENDİĞİNDE ÇALIŞACAK KOD
+  // 🛑 GÜVENLİK KONTROLÜ (Sayfa açılır açılmaz çalışır)
   useEffect(() => {
-    // LocalStorage'dan kullanıcıyı al
-    const loggedInUser = localStorage.getItem("user");
+    // 1. Tarayıcı hafızasına bak: Kullanıcı var mı?
+    const storedUser = localStorage.getItem("user");
 
-    if (loggedInUser) {
-      // Kullanıcı varsa state'e at
-      setUser(JSON.parse(loggedInUser));
-    } else {
-      // Kullanıcı YOKSA login sayfasına şutla
-      // state: { returnUrl: ... } ile giriş yapınca buraya geri dönmesini sağlayabiliriz (Opsiyonel)
-      alert("Yorum yapmak için giriş yapmalısınız!");
+    if (!storedUser) {
+      // 2. Kullanıcı YOKSA: Hiç bekleme yapma, direkt Login'e postala!
+      // state: { from: ... } kısmı ile giriş yapınca buraya geri dönmesini sağlayabiliriz (Opsiyonel)
+      alert("Yorum yapmak için önce giriş yapmalısınız.");
       navigate("/login");
+    } else {
+      // 3. Kullanıcı VARSA: Bilgileri al ve sayfayı göster
+      setUser(JSON.parse(storedUser));
     }
   }, [navigate]);
 
   const handleModalClose = () => {
     setShowModal(false);
+    // Yorum yapıldıktan sonra mekan detayına geri dön
     navigate(`/venue/${id}`);
   };
 
   const onSubmit = (evt) => {
     evt.preventDefault();
     
-    // Kullanıcı yoksa işlemi durdur (Güvenlik)
+    // Çift dikiş güvenlik: Submit anında kullanıcı yoksa durdur
     if (!user) {
         navigate("/login");
         return;
@@ -54,12 +55,12 @@ function AddComment() {
       setSubmitting(true);
 
       let newComment = {
-        author: user.name, // İsmi formdan değil, giriş yapan kullanıcıdan alıyoruz
+        author: user.name, // İsim otomatik olarak Token'daki isimden gelir
         text: text,
         rating: rating,
       };
 
-      // DÜZELTME: Token'ı (user.token) da gönderiyoruz
+      // Backend'e Token ile birlikte yolluyoruz
       VenueDataService.addComment(id, newComment, user.token)
         .then(() => {
           dispatch({ type: "ADD_COMMENT_SUCCESS" });
@@ -68,12 +69,10 @@ function AddComment() {
         .catch((err) => {
           console.error("Yorum Hatası:", err);
           dispatch({ type: "ADD_COMMENT_FAILURE" });
-          setSubmitting(false); 
+          setSubmitting(false);
           
-          // Eğer token süresi dolmuşsa (401 hatası) kullanıcıyı uyarabiliriz
           if (err.response && err.response.status === 401) {
              alert("Oturum süreniz dolmuş, lütfen tekrar giriş yapın.");
-             localStorage.removeItem("user"); // Temizle
              navigate("/login");
           } else {
              alert("Yorum eklenirken bir hata oluştu.");
@@ -84,8 +83,9 @@ function AddComment() {
     }
   };
 
-  // Eğer kullanıcı bilgisi henüz yüklenmediyse boş dön (Login'e yönleniyor zaten)
-  if (!user) return null;
+  // Kullanıcı yüklenene kadar (veya login'e gidene kadar) boş ekran göster
+  // Bu sayede kullanıcı boş formu görüp kafa karışıklığı yaşamaz.
+  if (!user) return null; 
 
   return (
     <>
@@ -108,13 +108,13 @@ function AddComment() {
             <div className="form-group">
               <label className="col-sm-2 control-label">İsim:</label>
               <div className="col-sm-10">
-                {/* İsim alanı artık otomatik dolu ve değiştirilemez (readOnly) */}
+                {/* İsim alanı kilitli ve otomatik dolu gelir */}
                 <input
                   type="text"
                   className="form-control"
                   id="author"
                   name="author"
-                  value={user.name || user.username} // Kullanıcı adı otomatik gelsin
+                  value={user.name} 
                   readOnly 
                   disabled
                 />
@@ -145,7 +145,7 @@ function AddComment() {
                   name="text"
                   rows={5}
                   disabled={submitting}
-                  required // HTML5 zorunluluk kontrolü
+                  required 
                 />
               </div>
             </div>
