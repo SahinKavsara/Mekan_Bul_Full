@@ -22,10 +22,10 @@ class VenueDataService {
     });
   }
 
-  // Yorum ekle
-  addComment(id, comment) {
-    // DÜZELTME: Başına '/api' eklendi
-    return http.post(`/api/venues/${id}/comments`, comment);
+  addComment(id, comment, token) {
+    return http.post(`/api/venues/${id}/comments`, comment, {
+       headers: { Authorization: `Bearer ${token}` }, // Token'ı header'a gömdük
+    });
   }
 }
 

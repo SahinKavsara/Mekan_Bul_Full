@@ -2,7 +2,7 @@
 import "./App.css";
 
 // React kütüphanesini içe aktar
-import React from "react";
+import React, { useState } from "react";
 
 // React DOM'u içe aktar
 import ReactDOM from "react-dom/client";

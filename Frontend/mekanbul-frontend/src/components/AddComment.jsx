@@ -1,5 +1,5 @@
 import Header from "./Header";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // useEffect eklendi
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import VenueDataService from "../services/VenueDataService";
 import { useDispatch } from "react-redux";
@@ -11,9 +11,27 @@ function AddComment() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Kullanıcı bilgisini State'te tutalım
+  const [user, setUser] = useState(null);
+
   const [showModal, setShowModal] = useState(false);
-  // Butona basıldığında yükleniyor durumu
-  const [submitting, setSubmitting] = useState(false); 
+  const [submitting, setSubmitting] = useState(false);
+
+  // SAYFA YÜKLENDİĞİNDE ÇALIŞACAK KOD
+  useEffect(() => {
+    // LocalStorage'dan kullanıcıyı al
+    const loggedInUser = localStorage.getItem("user");
+
+    if (loggedInUser) {
+      // Kullanıcı varsa state'e at
+      setUser(JSON.parse(loggedInUser));
+    } else {
+      // Kullanıcı YOKSA login sayfasına şutla
+      // state: { returnUrl: ... } ile giriş yapınca buraya geri dönmesini sağlayabiliriz (Opsiyonel)
+      alert("Yorum yapmak için giriş yapmalısınız!");
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const handleModalClose = () => {
     setShowModal(false);
@@ -23,36 +41,51 @@ function AddComment() {
   const onSubmit = (evt) => {
     evt.preventDefault();
     
-    // Form elemanlarını al
-    const author = evt.target.elements.author.value;
+    // Kullanıcı yoksa işlemi durdur (Güvenlik)
+    if (!user) {
+        navigate("/login");
+        return;
+    }
+
     const text = evt.target.elements.text.value;
     const rating = evt.target.elements.rating.value;
 
-    if (author && text && rating) {
-      // Butonu devre dışı bırak (Tıklanmaz yap)
+    if (text && rating) {
       setSubmitting(true);
 
       let newComment = {
-        author: author,
+        author: user.name, // İsmi formdan değil, giriş yapan kullanıcıdan alıyoruz
         text: text,
         rating: rating,
       };
 
-      VenueDataService.addComment(id, newComment)
+      // DÜZELTME: Token'ı (user.token) da gönderiyoruz
+      VenueDataService.addComment(id, newComment, user.token)
         .then(() => {
           dispatch({ type: "ADD_COMMENT_SUCCESS" });
-          // İşlem bitti, Modal'ı aç
           setShowModal(true); 
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error("Yorum Hatası:", err);
           dispatch({ type: "ADD_COMMENT_FAILURE" });
           setSubmitting(false); 
-          alert("Yorum eklenirken bir hata oluştu.");
+          
+          // Eğer token süresi dolmuşsa (401 hatası) kullanıcıyı uyarabiliriz
+          if (err.response && err.response.status === 401) {
+             alert("Oturum süreniz dolmuş, lütfen tekrar giriş yapın.");
+             localStorage.removeItem("user"); // Temizle
+             navigate("/login");
+          } else {
+             alert("Yorum eklenirken bir hata oluştu.");
+          }
         });
     } else {
         alert("Lütfen tüm alanları doldurunuz.");
     }
   };
+
+  // Eğer kullanıcı bilgisi henüz yüklenmediyse boş dön (Login'e yönleniyor zaten)
+  if (!user) return null;
 
   return (
     <>
@@ -75,12 +108,15 @@ function AddComment() {
             <div className="form-group">
               <label className="col-sm-2 control-label">İsim:</label>
               <div className="col-sm-10">
+                {/* İsim alanı artık otomatik dolu ve değiştirilemez (readOnly) */}
                 <input
                   type="text"
                   className="form-control"
                   id="author"
                   name="author"
-                  disabled={submitting}
+                  value={user.name || user.username} // Kullanıcı adı otomatik gelsin
+                  readOnly 
+                  disabled
                 />
               </div>
             </div>
@@ -109,6 +145,7 @@ function AddComment() {
                   name="text"
                   rows={5}
                   disabled={submitting}
+                  required // HTML5 zorunluluk kontrolü
                 />
               </div>
             </div>
