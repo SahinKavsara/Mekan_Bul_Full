@@ -1,21 +1,20 @@
-import { NavLink } from "react-router-dom";
 import Rating from "./Rating";
 import FoodAndDrinkList from "./FoodAndDrinkList";
 import Header from "./Header";
 import HourList from "./HourList";
 import CommentList from "./CommentList";
 import React from "react";
-import { useParams } from "react-router-dom";
+// DÜZELTME 1: NavLink yerine useNavigate'i ekledik
+import { useParams, useNavigate } from "react-router-dom"; 
 import { useSelector, useDispatch } from "react-redux";
 import VenueDataService from "../services/VenueDataService";
 
-// Mekan detay sayfası bileşeni
 const VenueDetail = () => {
-  // URL'den mekan ID'sini al
   const { id } = useParams();
   const dispatch = useDispatch();
+  // DÜZELTME 2: Yönlendirme fonksiyonunu tanımladık
+  const navigate = useNavigate(); 
 
-  // Redux store'dan verileri ve durumları çekiyoruz
   const {
     data: venue,
     isError,
@@ -23,7 +22,6 @@ const VenueDetail = () => {
     isSuccess,
   } = useSelector((state) => state);
 
-  // Veri Çekme İşlemi 
   React.useEffect(() => {
     dispatch({ type: "FETCH_INIT" });
     VenueDataService.getVenue(id)
@@ -35,10 +33,24 @@ const VenueDetail = () => {
       });
   }, [id, dispatch]);
 
+  // DÜZELTME 3: Butona tıklanınca çalışacak "Güvenlik Kontrolü" fonksiyonu
+  const handleAddCommentClick = () => {
+    // 1. Tarayıcı hafızasına bak
+    const user = localStorage.getItem("user");
+
+    if (!user) {
+      // 2. Kimse yoksa uyar ve Login'e postala
+      alert("Yorum yapmak için lütfen önce giriş yapınız.");
+      navigate("/login");
+    } else {
+      // 3. Giriş yapılmışsa Yorum sayfasına gönder (Mekan ismini de taşıyarak)
+      navigate(`/venue/${id}/comment/new`, { state: { name: venue.name } });
+    }
+  };
+
   return (
     <div>
       {isError ? (
-        // HATA DURUMU
         <div className="container">
             <div className="row">
                 <div className="col-xs-12">
@@ -47,7 +59,6 @@ const VenueDetail = () => {
             </div>
         </div>
       ) : isLoading ? (
-        // YÜKLENİYOR DURUMU
         <div className="container">
             <div className="row">
                 <div className="col-xs-12">
@@ -57,29 +68,20 @@ const VenueDetail = () => {
         </div>
       ) : (
         isSuccess && venue && (
-          // BAŞARILI DURUM
           <div>
-            {/* Sayfa başlığı - Mekan adını göster */}
             <Header headerText={venue.name} />
 
-            {/* Bootstrap container */}
             <div className="container">
               <div className="row">
                 <div className="col-xs-12 col-md-12">
                   <div className="row">
                     
-                    {/* SOL KOLON - Mekan Bilgileri */}
+                    {/* SOL KOLON */}
                     <div className="col-xs-12 col-sm-6 ">
-                      
-                      {/* Yıldız puanlama */}
                       <p className="rating">
                         <Rating rating={venue.rating} />
                       </p>
-
-                      {/* Mekan adresi */}
                       <p>{venue.address}</p>
-
-                      {/* Açılış saatleri paneli */}
                       <div className="panel panel-primary">
                         <div className="panel-heading ">
                           <h2 className="panel-title ">Açılış Saatleri</h2>
@@ -88,8 +90,6 @@ const VenueDetail = () => {
                           <HourList hourList={venue.hours || []} />
                         </div>
                       </div>
-
-                      {/* Yiyecek/içecek paneli */}
                       <div className="panel panel-primary">
                         <div className="panel-heading ">
                           <h2 className="panel-title ">Neler Var?</h2>
@@ -102,7 +102,7 @@ const VenueDetail = () => {
                       </div>
                     </div>
 
-                    {/* SAĞ KOLON - Harita */}
+                    {/* SAĞ KOLON */}
                     <div className="col-xs-12 col-sm-6">
                       <div className="panel panel-primary">
                         <div className="panel-heading ">
@@ -128,17 +128,17 @@ const VenueDetail = () => {
                   <div className="col-xs-12 ">
                     <div className="panel panel-primary">
                       
-                      {/* Flexbox ile Başlık ve Butonu Hizalama */}
+                      {/* Başlık ve Buton Hizalama */}
                       <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <h2 className="panel-title" style={{ margin: 0 }}>Yorumlar</h2>
                         
-                        <NavLink
-                          className="btn btn-default btn-xs" 
-                          to={`/venue/${id}/comment/new`}
-                          state={{ name: venue.name }}
+                        {/* DÜZELTME 4: NavLink'i sildik, yerine akıllı 'button' koyduk */}
+                        <button
+                          className="btn btn-default btn-xs"
+                          onClick={handleAddCommentClick}
                         >
                           Yorum Ekle
-                        </NavLink>
+                        </button>
                       </div>
 
                       <div className="panel-body ">
