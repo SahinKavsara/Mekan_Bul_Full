@@ -31,20 +31,21 @@ const VenueDetail = () => {
       });
   }, [id, dispatch]);
 
-  // --- GÜVENLİK KONTROLÜ FONKSİYONU ---
+  // --- DEDEKTİF KONTROLÜ ---
   const handleAddCommentClick = (e) => {
-    e.preventDefault(); // Varsayılan davranışı engelle
+    e.preventDefault();
     
-    // 1. Kullanıcı var mı kontrol et
-    const user = localStorage.getItem("user");
-    console.log("Butona tıklandı. Kullanıcı durumu:", user); // F12 Konsolunda görünür
+    // Veriyi çek ve temizle (bazen tırnak içinde "null" stringi kalabilir)
+    let user = localStorage.getItem("user");
+    
+    console.log("LOG DURUMU:", user);
 
-    if (!user) {
-      // 2. Kullanıcı YOKSA -> Login Sayfasına git
-      alert("Yorum yapmak için lütfen önce giriş yapınız.");
+    // Eğer user yoksa VEYA user "null" stringi ise VEYA user "undefined" ise
+    if (!user || user === "null" || user === "undefined") {
+      alert("Lütfen önce giriş yapın! (Yönlendiriliyor...)");
       navigate("/login");
     } else {
-      // 3. Kullanıcı VARSA -> Yorum Ekleme Sayfasına git
+      console.log("İçeri giriliyor...");
       navigate(`/venue/${id}/comment/new`, { state: { name: venue.name } });
     }
   };
@@ -52,21 +53,9 @@ const VenueDetail = () => {
   return (
     <div>
       {isError ? (
-        <div className="container">
-            <div className="row">
-                <div className="col-xs-12">
-                    <p><strong>Bir şeyler ters gitti! ...</strong></p>
-                </div>
-            </div>
-        </div>
+        <div className="container"><p>Hata oluştu.</p></div>
       ) : isLoading ? (
-        <div className="container">
-            <div className="row">
-                <div className="col-xs-12">
-                    <p><strong>Mekanlar Yükleniyor ...</strong></p>
-                </div>
-            </div>
-        </div>
+        <div className="container"><p>Yükleniyor...</p></div>
       ) : (
         isSuccess && venue && (
           <div>
@@ -76,51 +65,19 @@ const VenueDetail = () => {
               <div className="row">
                 <div className="col-xs-12 col-md-12">
                   <div className="row">
-                    
-                    {/* SOL KOLON */}
+                    {/* SOL TARAFI KISALTTIM (Odaklanmak için) */}
                     <div className="col-xs-12 col-sm-6 ">
-                      <p className="rating">
-                        <Rating rating={venue.rating} />
-                      </p>
+                      <p className="rating"><Rating rating={venue.rating} /></p>
                       <p>{venue.address}</p>
                       <div className="panel panel-primary">
-                        <div className="panel-heading ">
-                          <h2 className="panel-title ">Açılış Saatleri</h2>
-                        </div>
-                        <div className="panel-body ">
-                          <HourList hourList={venue.hours || []} />
-                        </div>
-                      </div>
-                      <div className="panel panel-primary">
-                        <div className="panel-heading ">
-                          <h2 className="panel-title ">Neler Var?</h2>
-                        </div>
-                        <div className="panel-body ">
-                          <FoodAndDrinkList
-                            foodAndDrinkList={venue.foodanddrink || []}
-                          />
-                        </div>
+                         <div className="panel-heading">Hizmetler</div>
+                         <div className="panel-body"><FoodAndDrinkList foodAndDrinkList={venue.foodanddrink || []} /></div>
                       </div>
                     </div>
 
-                    {/* SAĞ KOLON */}
+                    {/* SAĞ TARAF */}
                     <div className="col-xs-12 col-sm-6">
-                      <div className="panel panel-primary">
-                        <div className="panel-heading ">
-                          <h2 className="panel-title ">Konum Bilgisi</h2>
-                        </div>
-                        <div className="panel-body ">
-                          <img
-                            className="img img-responsive img-rounded"
-                            alt="Konum Bilgisi"
-                            src={`https://maps.googleapis.com/maps/api/staticmap?center=${
-                              venue.coordinates
-                            }&zoom=12&size=600x400&markers=${
-                              venue.coordinates
-                            }&key=AIzaSyCmmKygTpBzHGOZEciJpAdxC9v_tWHagnE`}
-                          />
-                        </div>
-                      </div>
+                       <p>Harita Alanı</p>
                     </div>
                   </div>
                 </div>
@@ -129,17 +86,24 @@ const VenueDetail = () => {
                   <div className="col-xs-12 ">
                     <div className="panel panel-primary">
                       
-                      {/* Başlık ve Buton Hizalama */}
                       <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <h2 className="panel-title" style={{ margin: 0 }}>Yorumlar</h2>
                         
-                        {/* --- BUTON GÜNCELLEMESİ --- */}
-                        <button
-                          className="btn btn-primary btn-xs" // Rengi mavi yaptım (farkı gör diye)
-                          onClick={handleAddCommentClick}
-                        >
-                          Yorum Ekle
-                        </button>
+                        {/* --- BURAYI KONTROL ET --- */}
+                        <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
+                            
+                            {/* DEDEKTİF KUTUSU: LocalStorage Durumunu Gösterir */}
+                            <div style={{background: 'red', color:'white', padding:'5px', fontSize:'10px'}}>
+                                DURUM: {localStorage.getItem("user") ? "GİRİŞ YAPILI" : "ÇIKIŞ YAPILI"}
+                            </div>
+
+                            <button
+                              className="btn btn-warning btn-xs"
+                              onClick={handleAddCommentClick}
+                            >
+                              GÜVENLİK TESTİ BUTONU
+                            </button>
+                        </div>
                         {/* ------------------------- */}
                         
                       </div>
