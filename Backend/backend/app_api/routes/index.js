@@ -1,14 +1,14 @@
 var express = require('express');
 var router = express.Router();
-var jwt = require('express-jwt'); // Güvenlik paketi
+
+// DÜZELTME: Yeni versiyon için süslü parantez ve 'expressjwt' kullanımı şart!
+var { expressjwt: jwt } = require('express-jwt'); 
 
 // Güvenlik Görevlisi Tanımlaması (Middleware)
-// Bu fonksiyon, gelen isteğin Header'ında "Bearer TOKEN" var mı diye bakar.
-// Varsa ve geçerliyse geçiş izni verir, yoksa 401 hatası fırlatır.
 var auth = jwt({
   secret: process.env.JWT_SECRET,
-  userProperty: 'payload', // Token içindeki bilgileri req.payload içine atar
-  algorithms: ['HS256'] // Standart şifreleme algoritması
+  userProperty: 'payload', 
+  algorithms: ['HS256'] 
 });
 
 // Mevcut Controllerlar
@@ -22,7 +22,6 @@ var authController = require("../controller/authentication");
 router
   .route("/venues")
   .get(venueController.listVenues)
-  // İPUCU: İleride admin eklerken buraya da 'auth' koyacağız
   .post(venueController.addVenue); 
 
 router
@@ -34,7 +33,7 @@ router
 // Yorum Rotaları
 router
   .route("/venues/:venueid/comments")
-  .post(auth, commentController.addComment); // DÜZELTME: Buraya 'auth' eklendi! 🔒
+  .post(auth, commentController.addComment); // 🔒 Kilitli Kapı (Auth aktif)
 
 router
   .route("/venues/:venueid/comments/:commentid")
