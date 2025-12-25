@@ -37,6 +37,13 @@ class VenueDataService {
   register(name, email, password) {
     return http.post("/api/register", { name, email, password });
   }
+
+  // Mekan Sil (Sadece Token'ı olan yönetici silebilir)
+  removeVenue(id, token) {
+    return http.delete(`/api/venues/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
 }
 
 export default new VenueDataService();

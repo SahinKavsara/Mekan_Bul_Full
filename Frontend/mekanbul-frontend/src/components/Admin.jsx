@@ -18,10 +18,28 @@ function Admin() {
       });
   }, []);
 
-  const handleDelete = (id, name) => {
-    // Silme işlemini bir sonraki adımda servise ekleyeceğiz, şimdilik sadece uyarı versin
-    if (window.confirm(`${name} mekanını silmek istediğinize emin misiniz?`)) {
-       alert("Silme fonksiyonu henüz bağlanmadı, birazdan yapacağız!");
+  const handleDelete = async (id, name) => {
+    // 1. Kullanıcıdan onay al
+    if (window.confirm(`${name} mekanını gerçekten silmek istiyor musunuz?`)) {
+      try {
+         // 2. Token'ı al (Güvenlik için şart)
+         const user = JSON.parse(localStorage.getItem("user"));
+         if (!user || !user.token) {
+            alert("Silme işlemi için giriş yapmalısınız!");
+            return;
+         }
+
+         // 3. Backend'e silme isteği gönder
+         await VenueDataService.removeVenue(id, user.token);
+         
+         // 4. Başarılı olursa listeyi güncelle (Silineni ekrandan kaldır)
+         setVenues(venues.filter(venue => venue._id !== id));
+         alert("Mekan başarıyla silindi!");
+
+      } catch (error) {
+         console.error(error);
+         alert("Silinirken bir hata oluştu! (Yetkiniz olmayabilir)");
+      }
     }
   };
 
