@@ -36,10 +36,11 @@ router
   .post(auth, commentController.addComment); // 🔒 Kilitli Kapı (Auth aktif)
 
 router
-  .route("/venues/:venueid/comments/:commentid")
-  .get(commentController.getComment)
-  .put(commentController.updateComment) 
-  .delete(commentController.deleteComment);
+  .route("/venues/:venueid")
+  .get(venueController.getVenue)
+  // Güncelleme ve Silme işlemlerine 'auth' ekledik
+  .put(auth, venueController.updateVenue) 
+  .delete(auth, venueController.deleteVenue);
 
 // Giriş ve Kayıt Rotaları
 router.post('/register', authController.register);

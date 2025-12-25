@@ -126,11 +126,19 @@ const updateVenue = async function (req, res) {
 
 const deleteVenue = async function (req, res) {
     try {
-        await Venue.findByIdAndDelete(req.params.venueid).then(function (venue) {
-            createResponse(res, 200, { status: venue.name + " isimli mekan silindi" });
-        });
+        // 1. Mekanı bul ve sil
+        const venue = await Venue.findByIdAndDelete(req.params.venueid);
+
+        // 2. Eğer mekan bulunduysa ve silindiyse
+        if (venue) {
+            createResponse(res, 200, { status: venue.name + " isimli mekan silindi." });
+        } else {
+            // Mekan yoksa hata dön
+            createResponse(res, 404, { status: "Böyle bir mekan bulunamadı!" });
+        }
     } catch (error) {
-        createResponse(res, 404, { status: "Böyle bir mekan yok!" });
+        // ID formatı hatalıysa veya başka sorun varsa
+        createResponse(res, 400, { status: "Silme işlemi başarısız.", error });
     }
 };
 
