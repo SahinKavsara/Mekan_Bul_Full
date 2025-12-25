@@ -11,56 +11,47 @@ function AddComment() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Kullanıcı bilgisini tutacak state
   const [user, setUser] = useState(null);
-
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // 🛑 GÜVENLİK KONTROLÜ (Sayfa açılır açılmaz çalışır)
   useEffect(() => {
-    // 1. Tarayıcı hafızasına bak: Kullanıcı var mı?
     const storedUser = localStorage.getItem("user");
-
     if (!storedUser) {
-      // 2. Kullanıcı YOKSA: Hiç bekleme yapma, direkt Login'e postala!
-      // state: { from: ... } kısmı ile giriş yapınca buraya geri dönmesini sağlayabiliriz (Opsiyonel)
-      alert("Yorum yapmak için önce giriş yapmalısınız.");
+      alert("Yorum yapmak için oturum açmalısınız.");
       navigate("/login");
     } else {
-      // 3. Kullanıcı VARSA: Bilgileri al ve sayfayı göster
       setUser(JSON.parse(storedUser));
     }
   }, [navigate]);
 
   const handleModalClose = () => {
     setShowModal(false);
-    // Yorum yapıldıktan sonra mekan detayına geri dön
     navigate(`/venue/${id}`);
   };
 
   const onSubmit = (evt) => {
     evt.preventDefault();
     
-    // Çift dikiş güvenlik: Submit anında kullanıcı yoksa durdur
     if (!user) {
         navigate("/login");
         return;
     }
 
+    // DÜZELTME 1: Verileri formdan alıyoruz (Artık ismi de formdan alıyoruz)
+    const author = evt.target.elements.author.value;
     const text = evt.target.elements.text.value;
     const rating = evt.target.elements.rating.value;
 
-    if (text && rating) {
+    if (author && text && rating) {
       setSubmitting(true);
 
       let newComment = {
-        author: user.name, // İsim otomatik olarak Token'daki isimden gelir
+        author: author, // DÜZELTME 2: Elle yazılan ismi gönderiyoruz
         text: text,
         rating: rating,
       };
 
-      // Backend'e Token ile birlikte yolluyoruz
       VenueDataService.addComment(id, newComment, user.token)
         .then(() => {
           dispatch({ type: "ADD_COMMENT_SUCCESS" });
@@ -68,23 +59,14 @@ function AddComment() {
         })
         .catch((err) => {
           console.error("Yorum Hatası:", err);
-          dispatch({ type: "ADD_COMMENT_FAILURE" });
           setSubmitting(false);
-          
-          if (err.response && err.response.status === 401) {
-             alert("Oturum süreniz dolmuş, lütfen tekrar giriş yapın.");
-             navigate("/login");
-          } else {
-             alert("Yorum eklenirken bir hata oluştu.");
-          }
+          alert("Yorum eklenirken hata oluştu.");
         });
     } else {
         alert("Lütfen tüm alanları doldurunuz.");
     }
   };
 
-  // Kullanıcı yüklenene kadar (veya login'e gidene kadar) boş ekran göster
-  // Bu sayede kullanıcı boş formu görüp kafa karışıklığı yaşamaz.
   if (!user) return null; 
 
   return (
@@ -108,15 +90,14 @@ function AddComment() {
             <div className="form-group">
               <label className="col-sm-2 control-label">İsim:</label>
               <div className="col-sm-10">
-                {/* İsim alanı kilitli ve otomatik dolu gelir */}
+                {/* DÜZELTME 3: Kilitleri kaldırdık, defaultValue yaptık */}
                 <input
                   type="text"
                   className="form-control"
                   id="author"
                   name="author"
-                  value={user.name} 
-                  readOnly 
-                  disabled
+                  defaultValue={user.name} 
+                  required
                 />
               </div>
             </div>
