@@ -32,18 +32,33 @@ var updateRating = function (venueid, isDeleted) {
         });
 };
 
-var createComment = function (req, res, incomingVenue) {
-    try {
-        incomingVenue.comments.push(req.body);
-        incomingVenue.save().then(function (venue) {
-            var comments = venue.comments;
-            var comment = comments[comments.length - 1];
-            updateRating(venue._id, false);
-            createResponse(res, "201", comment);
-        });
-    } catch (error) {
-        createResponse(res, "400", error);
-    }
+const createComment = function (req, res, incomingVenue) {
+  if (!incomingVenue) {
+    createResponse(res, 404, { "status": "Mekan bulunamadı" });
+  } else {
+    // Yorum objesini oluşturuyoruz
+    incomingVenue.comments.push({
+      // DÜZELTME BURADA:
+      // Artık ismi formdan (body) değil, Token'dan (payload) alıyoruz.
+      // Böylece kimse başkasının adına yorum atamaz.
+      author: req.payload.name, 
+      
+      rating: req.body.rating,
+      text: req.body.text
+    });
+
+    // Veritabanına kaydediyoruz
+    incomingVenue.save(function (err, venue) {
+      var comment;
+      if (err) {
+        createResponse(res, 400, err);
+      } else {
+        // Son eklenen yorumu bulup geri döndürüyoruz
+        comment = venue.comments[venue.comments.length - 1];
+        createResponse(res, 201, comment);
+      }
+    });
+  }
 };
 
 const addComment = async function (req, res) {
