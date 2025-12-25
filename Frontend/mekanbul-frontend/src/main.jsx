@@ -2,7 +2,7 @@
 import "./App.css";
 
 // React kütüphanesini içe aktar
-import React, { useState } from "react";
+import React from "react";
 
 // React DOM'u içe aktar
 import ReactDOM from "react-dom/client";
@@ -18,6 +18,9 @@ import PageNotFound from "./components/PageNotFound";
 // Login ve Register bileşenlerini çağırıyoruz
 import Login from "./components/Login";
 import Register from "./components/Register";
+
+// Admin bileşenini çağırıyoruz
+import Admin from "./components/Admin";
 
 // React Router bileşenlerini içe aktar
 import { Routes, Route, BrowserRouter } from "react-router-dom";
@@ -46,10 +49,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="venue/:id/comment/new" element={<AddComment />} />
           <Route path="about" element={<About />} />
 
-          
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           
+          {/* --- ADMIN ROTASI EKLENDİ --- */}
+          <Route path="admin" element={<Admin />} />
+          {/* ---------------------------- */}
 
           <Route path="*" element={<PageNotFound />} />
         </Route>
