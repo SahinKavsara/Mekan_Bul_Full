@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 function AddVenue() {
   const navigate = useNavigate();
   
-  // Form verilerini tutacak state
   const [venue, setVenue] = useState({
     name: "",
     address: "",
@@ -31,25 +30,37 @@ function AddVenue() {
   const onSubmit = (event) => {
     event.preventDefault();
     
-    // Yiyecek içecekleri virgülden ayırıp diziye çevirmemiz gerekebilir
-    // Ama şimdilik string olarak gönderiyoruz, backend şeman nasılsa öyle
-    
-    // Token'ı al (Güvenlik için)
+    // GÜVENLİK KONTROLÜ
     const user = JSON.parse(localStorage.getItem("user"));
-    
     if(!user || !user.token) {
         alert("Mekan eklemek için giriş yapmalısınız!");
         return;
     }
 
-    VenueDataService.addVenue(venue, user.token)
+    // --- VERİ DÜZELTME (Data Cleaning) ---
+    // Formdan gelen verileri Backend'in seveceği formata çeviriyoruz
+    const payload = {
+        ...venue,
+        rating: 0, // Varsayılan puan (Şema zorunlu tutuyorsa patlamasın diye)
+        lat: parseFloat(venue.lat),  // String'i Sayıya çevir
+        long: parseFloat(venue.long), // String'i Sayıya çevir
+        // Yiyecekleri virgülden ayırıp diziye çevirmek gerekirse: 
+        // foodanddrink: venue.foodanddrink.split(",").map(item => item.trim()) 
+    };
+
+    VenueDataService.addVenue(payload, user.token)
       .then((response) => {
-        alert("Mekan başarıyla eklendi!");
-        navigate("/admin"); // İşlem bitince listeye geri dön
+        alert("Mekan başarıyla eklendi! 🎉");
+        navigate("/admin");
       })
       .catch((e) => {
-        console.log(e);
-        alert("Hata oluştu! Lütfen tüm alanları doldurduğunuzdan emin olun.");
+        console.error("Mekan Ekleme Hatası:", e);
+        // Hatanın detayını kullanıcıya gösterelim (alert içinde)
+        if (e.response && e.response.data) {
+             alert("Hata Detayı: " + JSON.stringify(e.response.data));
+        } else {
+             alert("Hata oluştu! Lütfen tüm alanları doldurun ve sayısal değerleri kontrol edin.");
+        }
       });
   };
 
@@ -74,18 +85,18 @@ function AddVenue() {
 
               <div className="form-group">
                 <label>İmkanlar (Virgülle ayırın):</label>
-                <input type="text" className="form-control" name="foodanddrink" placeholder="Çay, Kahve, Kek" value={venue.foodanddrink} onChange={handleInputChange} />
+                <input type="text" className="form-control" name="foodanddrink" placeholder="Çay, Kahve, Kek" value={venue.foodanddrink} onChange={handleInputChange} required />
               </div>
 
               <div className="form-group">
                 <div className="row">
                     <div className="col-xs-6">
                         <label>Enlem (Lat):</label>
-                        <input type="text" className="form-control" name="lat" value={venue.lat} onChange={handleInputChange} />
+                        <input type="number" step="any" className="form-control" name="lat" placeholder="37.76" value={venue.lat} onChange={handleInputChange} required />
                     </div>
                     <div className="col-xs-6">
                         <label>Boylam (Long):</label>
-                        <input type="text" className="form-control" name="long" value={venue.long} onChange={handleInputChange} />
+                        <input type="number" step="any" className="form-control" name="long" placeholder="30.55" value={venue.long} onChange={handleInputChange} required />
                     </div>
                 </div>
               </div>
