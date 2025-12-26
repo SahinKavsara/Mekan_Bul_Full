@@ -44,6 +44,12 @@ class VenueDataService {
       headers: { Authorization: `Bearer ${token}` },
     });
   }
+
+  updateVenue(id, data, token) {
+    return http.put(`/api/venues/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
 }
 
 export default new VenueDataService();

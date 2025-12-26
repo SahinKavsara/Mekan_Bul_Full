@@ -24,6 +24,8 @@ import Admin from "./components/Admin";
 
 import AddVenue from "./components/AddVenue";
 
+import UpdateVenue from "./components/UpdateVenue";
+
 // React Router bileşenlerini içe aktar
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 
@@ -56,6 +58,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           
           <Route path="admin" element={<Admin />} />
           <Route path="admin/add" element={<AddVenue />} />
+          <Route path="admin/update/:id" element={<UpdateVenue />} />
 
           <Route path="*" element={<PageNotFound />} />
         </Route>
