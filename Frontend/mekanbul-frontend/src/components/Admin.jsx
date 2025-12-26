@@ -8,80 +8,86 @@ function Admin() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // --- 1. GÜVENLİK KONTROLÜ (YENİ EKLENEN KISIM) ---
-  // Sayfa açılır açılmaz çalışır. Kullanıcı yoksa Login'e atar.
+  // --- YARDIMCI: Token Çözücü Fonksiyon ---
+  // Bu fonksiyon şifreli token'ın içini okur
+  const parseJwt = (token) => {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+      return null;
+    }
+  };
+
+  // --- GÜVENLİK KONTROLÜ (GÜNCELLENDİ) ---
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     
-    // Kullanıcı yoksa, token yoksa VEYA admin değilse
-    if (!user || !user.token || !user.isAdmin) {
+    // 1. Kullanıcı veya Token hiç yoksa -> DİREKT Login'e
+    if (!user || !user.token) {
         navigate("/login");
-    }
-  }, [navigate]);
-  // -------------------------------------------------
-
-  useEffect(() => {
-    // Eğer yukarıdaki kontrolden geçerse (yani adminse) burası çalışır
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          getVenues(position.coords.latitude, position.coords.longitude);
-        },
-        () => {
-          console.log("Konum alınamadı, varsayılan konum kullanılıyor.");
-          getVenues(37.77, 30.55);
-        }
-      );
-    } else {
-      getVenues(37.77, 30.55);
-    }
-  }, []);
-
-  const getVenues = (lat, long) => {
-    VenueDataService.nearbyVenues(lat, long)
-      .then((response) => {
-        // --- DEDEKTİF MODU BAŞLANGIÇ ---
-        console.log("BACKEND'DEN GELEN VERİ:", response.data);
-        if (response.data.length > 0) {
-            console.log("İlk mekanın ID durumu:", "id:", response.data[0].id, "_id:", response.data[0]._id);
-        }
-        // --------------------------------
-        setVenues(response.data);
-      })
-      .catch((e) => {
-        console.error(e);
-        setError("Mekanlar getirilirken hata oluştu.");
-      });
-  };
-
-  const handleDelete = async (venue) => {
-    // BURASI ÇOK ÖNEMLİ: Hem id'ye hem _id'ye bakıyoruz!
-    const venueId = venue.id || venue._id;
-
-    console.log("Silinecek ID:", venueId); 
-
-    if (!venueId) {
-        alert("HATA: Mekan ID'si bulunamadı! Konsolu (F12) kontrol edin.");
         return;
     }
 
-    if (window.confirm(`${venue.name} mekanını gerçekten silmek istiyor musunuz?`)) {
+    // 2. Token var ama içinde "isAdmin: true" yazıyor mu?
+    const decodedToken = parseJwt(user.token);
+
+    if (!decodedToken || !decodedToken.isAdmin) {
+        // Token var ama Admin değil -> Login'e
+        console.log("Kullanıcı Admin değil, yönlendiriliyor...");
+        navigate("/login");
+    }
+  }, [navigate]);
+  // ----------------------------------------
+
+
+  // --- 10 SANİYE HAREKETSİZLİK KURALI ---
+  useEffect(() => {
+    let timeoutId;
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        alert("Oturum süreniz doldu (10sn hareketsizlik).");
+        localStorage.removeItem("user");
+        navigate("/login");
+        window.location.reload();
+      }, 10000); 
+    };
+    window.addEventListener("mousemove", resetTimer);
+    window.addEventListener("keydown", resetTimer);
+    window.addEventListener("click", resetTimer);
+    resetTimer();
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("mousemove", resetTimer);
+      window.removeEventListener("keydown", resetTimer);
+      window.removeEventListener("click", resetTimer);
+    };
+  }, [navigate]);
+
+  // --- MEKANLARI GETİR ---
+  useEffect(() => {
+    // Tüm mekanları getiren servisi çağırıyoruz
+    VenueDataService.getAllVenues()
+      .then((response) => {
+        setVenues(response.data);
+      })
+      .catch((e) => {
+        console.log(e);
+        setError("Mekanlar getirilirken hata oluştu.");
+      });
+  }, []);
+
+  const handleDelete = async (venue) => {
+    const venueId = venue.id || venue._id;
+    if (window.confirm(`${venue.name} silinsin mi?`)) {
       try {
          const user = JSON.parse(localStorage.getItem("user"));
-         if (!user || !user.token) {
-            alert("Silme işlemi için giriş yapmalısınız!");
-            return; // Burada return yaparak işlemi durduruyoruz
-         }
-
          await VenueDataService.removeVenue(venueId, user.token);
-         
-         // Listeden silineni çıkarırken de aynı kontrolü yapıyoruz
          setVenues(venues.filter(v => (v.id || v._id) !== venueId));
-         alert("Mekan başarıyla silindi!");
-
+         alert("Silindi!");
       } catch (error) {
-         console.error("Silme Hatası:", error);
-         alert("Silinirken bir hata oluştu! (Yetkiniz olmayabilir)");
+         console.error(error);
+         alert("Hata oluştu!");
       }
     }
   };
@@ -89,25 +95,16 @@ function Admin() {
   return (
     <>
       <Header headerText="Yönetici Paneli" motto="Mekanları Yönet" />
-      
       <div className="container">
         <div className="row">
           <div className="col-xs-12">
-            
             <div style={{ marginBottom: "20px", textAlign: "right" }}>
-              <button 
-                className="btn btn-success"
-                onClick={() => navigate("/admin/add")}
-              >
-                + Yeni Mekan Ekle
-              </button>
+              <button className="btn btn-success" onClick={() => navigate("/admin/add")}>+ Yeni Ekle</button>
             </div>
-
             {error && <div className="alert alert-danger">{error}</div>}
-
             {venues.length > 0 ? (
               <div className="panel panel-primary">
-                <div className="panel-heading">Mekan Listesi</div>
+                <div className="panel-heading">Mekan Listesi (Tümü)</div>
                 <div className="table-responsive">
                     <table className="table table-striped table-hover">
                         <thead>
@@ -120,7 +117,6 @@ function Admin() {
                         </thead>
                         <tbody>
                             {venues.map((venue) => {
-                                // Satır içinde değişkeni tanımla
                                 const currentId = venue.id || venue._id;
                                 return (
                                     <tr key={currentId}>
@@ -128,21 +124,8 @@ function Admin() {
                                         <td>{venue.address}</td>
                                         <td>{venue.rating}</td>
                                         <td style={{textAlign: "right"}}>
-                                            <button 
-                                                className="btn btn-info btn-xs" 
-                                                style={{ marginRight: "5px" }}
-                                                onClick={() => navigate(`/admin/update/${currentId}`)}
-                                            >
-                                                Güncelle
-                                            </button>
-                                            
-                                            <button 
-                                                className="btn btn-danger btn-xs"
-                                                // Fonksiyona tüm venue objesini gönderiyoruz ki ID'yi kendi bulsun
-                                                onClick={() => handleDelete(venue)}
-                                            >
-                                                Sil
-                                            </button>
+                                            <button className="btn btn-info btn-xs" style={{ marginRight: "5px" }} onClick={() => navigate(`/admin/update/${currentId}`)}>Güncelle</button>
+                                            <button className="btn btn-danger btn-xs" onClick={() => handleDelete(venue)}>Sil</button>
                                         </td>
                                     </tr>
                                 );
@@ -152,11 +135,8 @@ function Admin() {
                 </div>
               </div>
             ) : (
-              <div className="alert alert-warning">
-                 {error ? "Hata oluştu." : "Hiç mekan bulunamadı."}
-              </div>
+              <div className="alert alert-warning">{error ? "Hata." : "Mekan yok."}</div>
             )}
-
           </div>
         </div>
       </div>
