@@ -18,7 +18,7 @@ function Admin() {
     }
   };
 
-  // --- GÜVENLİK KONTROLÜ (GÜNCELLENDİ) ---
+  // --- GÜVENLİK KONTROLÜ ---
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     
@@ -32,30 +32,30 @@ function Admin() {
     const decodedToken = parseJwt(user.token);
 
     if (!decodedToken || !decodedToken.isAdmin) {
-        // Token var ama Admin değil -> Login'e
         console.log("Kullanıcı Admin değil, yönlendiriliyor...");
         navigate("/login");
     }
   }, [navigate]);
-  // ----------------------------------------
 
-
-  // --- 10 SANİYE HAREKETSİZLİK KURALI ---
+  // --- 10 SANİYE HAREKETSİZLİK KURALI (Madde 6) ---
   useEffect(() => {
     let timeoutId;
     const resetTimer = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         alert("Oturum süreniz doldu (10sn hareketsizlik).");
-        localStorage.removeItem("user");
+        localStorage.removeItem("user"); // Çıkış yap
         navigate("/login");
         window.location.reload();
-      }, 10000); 
+      }, 10000); // 10 saniye
     };
+    
     window.addEventListener("mousemove", resetTimer);
     window.addEventListener("keydown", resetTimer);
     window.addEventListener("click", resetTimer);
-    resetTimer();
+    
+    resetTimer(); // Başlat
+    
     return () => {
       clearTimeout(timeoutId);
       window.removeEventListener("mousemove", resetTimer);
@@ -64,9 +64,9 @@ function Admin() {
     };
   }, [navigate]);
 
-  // --- MEKANLARI GETİR ---
+  // --- MEKANLARI GETİR (TÜMÜ) ---
   useEffect(() => {
-    // Tüm mekanları getiren servisi çağırıyoruz
+    // getAllVenues fonksiyonu artık VenueDataService.js içinde olmalı!
     VenueDataService.getAllVenues()
       .then((response) => {
         setVenues(response.data);
@@ -83,6 +83,7 @@ function Admin() {
       try {
          const user = JSON.parse(localStorage.getItem("user"));
          await VenueDataService.removeVenue(venueId, user.token);
+         // Listeyi güncelle
          setVenues(venues.filter(v => (v.id || v._id) !== venueId));
          alert("Silindi!");
       } catch (error) {
@@ -101,7 +102,9 @@ function Admin() {
             <div style={{ marginBottom: "20px", textAlign: "right" }}>
               <button className="btn btn-success" onClick={() => navigate("/admin/add")}>+ Yeni Ekle</button>
             </div>
+            
             {error && <div className="alert alert-danger">{error}</div>}
+            
             {venues.length > 0 ? (
               <div className="panel panel-primary">
                 <div className="panel-heading">Mekan Listesi (Tümü)</div>
