@@ -178,10 +178,33 @@ const deleteVenue = async function (req, res) {
     }
 };
 
+
+const listAllVenues = async function (req, res) {
+    try {
+        // .find({}) içine boş obje koymak "Filtresiz her şeyi getir" demektir
+        const venues = await Venue.find({}); 
+        
+        // Frontend'in beklediği formata çevirelim (id dönüşümü önemli)
+        const response = venues.map(venue => ({
+            name: venue.name,
+            address: venue.address,
+            rating: venue.rating,
+            foodanddrink: venue.foodanddrink,
+            id: venue._id, // Frontend 'id' bekliyor
+            coordinates: venue.coordinates 
+        }));
+        
+        createResponse(res, 200, response);
+    } catch (error) {
+        createResponse(res, 400, { status: "Mekanlar listelenemedi", error });
+    }
+};
+
 module.exports = {
     listVenues,
     addVenue,
     getVenue,
     updateVenue,
-    deleteVenue
+    deleteVenue,
+    listAllVenues
 }

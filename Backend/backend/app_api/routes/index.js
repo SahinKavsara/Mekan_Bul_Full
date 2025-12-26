@@ -1,47 +1,49 @@
 var express = require('express');
 var router = express.Router();
 
-// DÜZELTME: Yeni versiyon için süslü parantez ve 'expressjwt' kullanımı şart!
+// JWT Kütüphanesi
 var { expressjwt: jwt } = require('express-jwt'); 
 
-// Güvenlik Görevlisi Tanımlaması (Middleware)
+// Güvenlik Görevlisi (Middleware)
 var auth = jwt({
   secret: process.env.JWT_SECRET,
   userProperty: 'payload', 
   algorithms: ['HS256'] 
 });
 
-// Mevcut Controllerlar
+// Controllerlar
 var venueController = require("../controller/VenueController");
 var commentController = require("../controller/CommentController");
-
-// Authentication Controller
 var authController = require("../controller/authentication"); 
 
-// Mekan Rotaları
+// --- 1. ADMİN ROTASI (YENİ EKLENEN KISIM) ---
+// Bu satır, VenueDataService.getAllVenues() fonksiyonunun çalışmasını sağlar.
+// ÖNEMLİ: '/venues/:venueid' rotasından ÖNCE gelmeli.
+router
+  .route("/admin/venues")
+  .get(venueController.listAllVenues);
+
+
+// --- 2. MEKAN ROTALARI ---
 router
   .route("/venues")
   .get(venueController.listVenues)
-  .post(venueController.addVenue); 
+  .post(auth, venueController.addVenue); // Ekleme işlemi de şifreli olmalı (İsteğe bağlı, auth silebilirsin)
 
 router
   .route("/venues/:venueid")
-  .get(venueController.getVenue)
-  .put(venueController.updateVenue)
-  .delete(venueController.deleteVenue);
+  .get(venueController.getVenue)             // Herkes görebilir
+  .put(auth, venueController.updateVenue)    // Sadece Admin günceller 🔒
+  .delete(auth, venueController.deleteVenue);// Sadece Admin siler 🔒
 
-// Yorum Rotaları
+
+// --- 3. YORUM ROTALARI ---
 router
   .route("/venues/:venueid/comments")
-  .post(auth, commentController.addComment); // 🔒 Kilitli Kapı (Auth aktif)
+  .post(auth, commentController.addComment); // Yorum yapmak için giriş şart 🔒
 
-router
-  .route("/venues/:venueid")
-  .get(venueController.getVenue)
-  .put(auth, venueController.updateVenue) 
-  .delete(auth, venueController.deleteVenue);
 
-// Giriş ve Kayıt Rotaları
+// --- 4. GİRİŞ VE KAYIT ---
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 
