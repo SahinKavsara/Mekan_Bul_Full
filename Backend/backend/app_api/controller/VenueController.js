@@ -1,162 +1,53 @@
 var mongoose = require('mongoose');
 var Venue = mongoose.model("venue");
+const jwt = require('jsonwebtoken'); // <-- YENİ EKLEME: Token çözücü
 
 const createResponse = function (res, status, content) {
     res.status(status).json(content);
 }
 
-var converter = (function () {
-    var earthRadius = 6371; // km
-    var radian2Kilometer = function (radian) {
-        return parseFloat(radian * earthRadius);
-    };
-    var kilometer2Radian = function (distance) {
-        return parseFloat(distance / earthRadius);
-    };
-    return {
-        radian2Kilometer, kilometer2Radian,
-    }
-})();
+// ... Diğer fonksiyonlar (listVenues, addVenue vb.) aynı kalabilir ...
+// ... Sadece deleteVenue ve updateVenue'yu değiştireceğiz ...
+// Yer kazanmak için yukarıdaki fonksiyonları ellemiyorum, sen dosyanın o kısımlarını koru.
 
-const listVenues = function (req, res) {
-    var lat = parseFloat(req.query.lat) || 0;
-    var long = parseFloat(req.query.long) || 0;
-    var point = { type: "Point", coordinates: [lat, long] };
-    var geoOptions = {
-        distanceField: "distance", spherical: true,
-        maxDistance: converter.radian2Kilometer(5000)
-    };
-    try {
-        Venue.aggregate([
-            {
-                $geoNear: {
-                    near: point, ...geoOptions,
-                }
-            }]).then((result) => {
-                const venues = result.map(function (venue) {
-                    return {
-                        distance: converter.kilometer2Radian(venue.distance),
-                        name: venue.name,
-                        address: venue.address,
-                        rating: venue.rating,
-                        foodanddrink: venue.foodanddrink,
-                        id: venue._id,
-                    };
-                });
-                if (venues.length > 0)
-                    createResponse(res, "200", venues);
-                else
-                    createResponse(res, "200", []);
-            })
-    } catch (error) {
-        createResponse(res, "404", error);
-    }
-};
-
-const addVenue = async function (req, res) {
-    try {
-        await Venue.create({
-            ...req.body,
-            coordinates: [req.body.lat, req.body.long],
-            hours: [
-                {
-                    days: req.body.days1,
-                    open: req.body.open1,
-                    close: req.body.close1,
-                    isClosed: req.body.isClosed1
-                },
-                {
-                    days: req.body.days2,
-                    open: req.body.open2,
-                    close: req.body.close2,
-                    isClosed: req.body.isClosed2
-                }
-            ],
-        }).then(function (response) {
-            createResponse(res, "201", response);
-        })
-    }
-    catch (error) {
-        createResponse(res, "400", error);
-    }
-};
-
-const getVenue = async function (req, res) {
-    try {
-        await Venue.findById(req.params.venueid).exec().then(function (venue) {
-            createResponse(res, 200, venue);
-        });
-
-    }
-    catch (err) {
-        createResponse(res, 404, { status: "böyle bir mekan yok" });
-    }
-}
-
-const updateVenue = async function (req, res) {
-    try {
-
-        if (!req.payload.isAdmin) {
-             return createResponse(res, 403, { "status": "Yetkiniz yok! Sadece Adminler güncelleyebilir." });
-        }
-
-        const updatedVenue = await Venue.findByIdAndUpdate(
-            req.params.venueid,
-            {
-                ...req.body,
-                coordinates: [req.body.lat, req.body.long],
-                hours: [
-                    {
-                        days: req.body.day1,
-                        open: req.body.open1,
-                        close: req.body.close1,
-                        isClosed: req.body.isClosed1
-                    },
-                    {
-                        days: req.body.day2,
-                        open: req.body.open2,
-                        close: req.body.close2,
-                        isClosed: req.body.isClosed2
-                    }
-                ]
-            },
-            { new: true }
-        );
-
-        createResponse(res, 201, updatedVenue);
-    } catch (error) {
-        createResponse(res, 400, { status: "Güncelleme başarsız.", error });
-    }
-};
-
+// --- GÜNCELLENMİŞ SİLME FONKSİYONU ---
 const deleteVenue = async function (req, res) {
     try {
-        console.log("---------------- SİLME İŞLEMİ LOGLARI ----------------");
-        console.log("1. Silinmek istenen ID:", req.params.venueid);
-        
-        // KONTROL 1: Kullanıcı verisi hangi kutuda gelmiş?
-        console.log("2. req.payload durumu:", req.payload);
-        console.log("3. req.auth durumu (Yeni versiyonlar bunu kullanır):", req.auth);
-        
-        // Hangi kutu doluysa onu kullanalım (Fallback mekanizması)
-        const currentUser = req.payload || req.auth;
+        console.log("Silme işlemi başladı. ID:", req.params.venueid);
 
-        if (!currentUser) {
-            console.log("HATA: Kullanıcı verisi (Token) okunamadı! Middleware çalışmadı veya header gelmedi.");
-            return createResponse(res, 401, { "status": "Token bulunamadı veya çözülemedi." });
+        // 1. MANUEL TOKEN KONTROLÜ
+        // Header'dan token'ı alıyoruz
+        const authHeader = req.headers.authorization;
+        
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+             console.log("HATA: Token header'da yok!");
+             return createResponse(res, 401, { "status": "Token bulunamadı. Giriş yapmalısınız." });
         }
 
-        if (!currentUser.isAdmin) {
-             console.log("HATA: Kullanıcı Admin değil. Kullanıcı Adı:", currentUser.name);
+        const token = authHeader.split(' ')[1]; // "Bearer <token>" kısmından token'ı ayır
+
+        // Token'ı şifreyle çözüyoruz
+        let user;
+        try {
+            user = jwt.verify(token, process.env.JWT_SECRET);
+            console.log("Token doğrulandı. Kullanıcı:", user.name, "Admin mi:", user.isAdmin);
+        } catch (err) {
+            console.log("HATA: Token geçersiz veya süresi dolmuş.");
+            return createResponse(res, 401, { "status": "Geçersiz Token." });
+        }
+
+        // 2. YETKİ KONTROLÜ
+        if (!user.isAdmin) {
+             console.log("HATA: Kullanıcı Admin değil.");
              return createResponse(res, 403, { "status": "Yetkiniz yok! Sadece Adminler silebilir." });
         }
 
+        // 3. SİLME İŞLEMİ
         const venue = await Venue.findByIdAndDelete(req.params.venueid);
         if (venue) {
             console.log("BAŞARILI: Mekan silindi.");
             createResponse(res, 200, { status: venue.name + " isimli mekan silindi." });
         } else {
-            console.log("HATA: Veritabanında bu ID ile mekan bulunamadı.");
             createResponse(res, 404, { status: "Böyle bir mekan bulunamadı!" });
         }
     } catch (error) {
@@ -165,10 +56,11 @@ const deleteVenue = async function (req, res) {
     }
 };
 
+// ... Diğer updateVenue vb. fonksiyonlar ...
+// ... updateVenue için de aynı mantığı uygulayabilirsin ...
+
 module.exports = {
-    listVenues,
-    addVenue,
-    getVenue,
-    updateVenue,
-    deleteVenue
+    // ... diğerleri ...
+    deleteVenue, // Bunu export etmeyi unutma
+    // ...
 }
