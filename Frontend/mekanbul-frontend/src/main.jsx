@@ -22,6 +22,8 @@ import Register from "./components/Register";
 // Admin bileşenini çağırıyoruz
 import Admin from "./components/Admin";
 
+import AddVenue from "./components/AddVenue";
+
 // React Router bileşenlerini içe aktar
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 
@@ -52,9 +54,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           
-          {/* --- ADMIN ROTASI EKLENDİ --- */}
           <Route path="admin" element={<Admin />} />
-          {/* ---------------------------- */}
+          <Route path="admin/add" element={<AddVenue />} />
 
           <Route path="*" element={<PageNotFound />} />
         </Route>
