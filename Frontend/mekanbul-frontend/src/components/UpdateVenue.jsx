@@ -23,6 +23,16 @@ function UpdateVenue() {
     isClosed2: false
   });
 
+  // --- GÜVENLİK KONTROLÜ (YENİ EKLENEN KISIM) ---
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    // Eğer kullanıcı yoksa, token yoksa veya Admin değilse Login'e at
+    if (!user || !user.token || !user.isAdmin) {
+        navigate("/login");
+    }
+  }, [navigate]);
+  // -------------------------------------------------
+
   // Sayfa yüklenince mevcut verileri getir
   useEffect(() => {
     VenueDataService.getVenue(id).then((response) => {
@@ -31,17 +41,17 @@ function UpdateVenue() {
         setVenue({
             name: data.name,
             address: data.address,
-            foodanddrink: data.foodanddrink, // Dizi ise stringe çevirmek gerekebilir
-            lat: data.coordinates[0],
-            long: data.coordinates[1],
-            days1: data.hours[0] ? data.hours[0].days : "",
-            open1: data.hours[0] ? data.hours[0].open : "",
-            close1: data.hours[0] ? data.hours[0].close : "",
-            isClosed1: data.hours[0] ? data.hours[0].isClosed : false,
-            days2: data.hours[1] ? data.hours[1].days : "",
-            open2: data.hours[1] ? data.hours[1].open : "",
-            close2: data.hours[1] ? data.hours[1].close : "",
-            isClosed2: data.hours[1] ? data.hours[1].isClosed : false,
+            foodanddrink: data.foodanddrink,
+            lat: data.coordinates ? data.coordinates[0] : "",
+            long: data.coordinates ? data.coordinates[1] : "",
+            days1: data.hours && data.hours[0] ? data.hours[0].days : "",
+            open1: data.hours && data.hours[0] ? data.hours[0].open : "",
+            close1: data.hours && data.hours[0] ? data.hours[0].close : "",
+            isClosed1: data.hours && data.hours[0] ? data.hours[0].isClosed : false,
+            days2: data.hours && data.hours[1] ? data.hours[1].days : "",
+            open2: data.hours && data.hours[1] ? data.hours[1].open : "",
+            close2: data.hours && data.hours[1] ? data.hours[1].close : "",
+            isClosed2: data.hours && data.hours[1] ? data.hours[1].isClosed : false,
         });
     });
   }, [id]);
@@ -60,17 +70,13 @@ function UpdateVenue() {
         return;
     }
 
-    // Backend'in beklediği format (AddVenue ile aynı mantık)
+    // Backend'in beklediği format
     const payload = {
         ...venue,
         lat: parseFloat(venue.lat),
         long: parseFloat(venue.long),
-        // Not: Backend controller'ımızda 'day' düzeltmesini yapmıştık
-        // O yüzden burada days1 göndersek bile controller onu 'day' olarak kaydedecek
     };
 
-    // Dikkat: VenueDataService.js dosyanda updateVenue fonksiyonu olmalı!
-    // Eğer yoksa bir sonraki adımda ekleyeceğiz.
     VenueDataService.updateVenue(id, payload, user.token)
       .then((response) => {
         alert("Mekan başarıyla güncellendi! 🎉");
@@ -78,7 +84,11 @@ function UpdateVenue() {
       })
       .catch((e) => {
         console.error("Güncelleme Hatası:", e);
-        alert("Güncelleme başarısız oldu.");
+        if (e.response && e.response.data) {
+             alert("Hata Detayı: " + JSON.stringify(e.response.data));
+        } else {
+             alert("Güncelleme başarısız oldu.");
+        }
       });
   };
 

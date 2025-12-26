@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./Header";
 import VenueDataService from "../services/VenueDataService";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +22,16 @@ function AddVenue() {
     isClosed2: false
   });
 
+  // --- GÜVENLİK KONTROLÜ (YENİ EKLENEN KISIM) ---
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    // Eğer kullanıcı yoksa, token yoksa veya Admin değilse Login'e at
+    if (!user || !user.token || !user.isAdmin) {
+        navigate("/login");
+    }
+  }, [navigate]);
+  // -------------------------------------------------
+
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
     setVenue({ ...venue, [name]: type === "checkbox" ? checked : value });
@@ -30,7 +40,7 @@ function AddVenue() {
   const onSubmit = (event) => {
     event.preventDefault();
     
-    // GÜVENLİK KONTROLÜ
+    // GÜVENLİK KONTROLÜ (Token var mı diye tekrar bakıyoruz)
     const user = JSON.parse(localStorage.getItem("user"));
     if(!user || !user.token) {
         alert("Mekan eklemek için giriş yapmalısınız!");
@@ -38,14 +48,11 @@ function AddVenue() {
     }
 
     // --- VERİ DÜZELTME (Data Cleaning) ---
-    // Formdan gelen verileri Backend'in seveceği formata çeviriyoruz
     const payload = {
         ...venue,
-        rating: 0, // Varsayılan puan (Şema zorunlu tutuyorsa patlamasın diye)
-        lat: parseFloat(venue.lat),  // String'i Sayıya çevir
-        long: parseFloat(venue.long), // String'i Sayıya çevir
-        // Yiyecekleri virgülden ayırıp diziye çevirmek gerekirse: 
-        // foodanddrink: venue.foodanddrink.split(",").map(item => item.trim()) 
+        rating: 0,
+        lat: parseFloat(venue.lat), 
+        long: parseFloat(venue.long), 
     };
 
     VenueDataService.addVenue(payload, user.token)
@@ -55,7 +62,6 @@ function AddVenue() {
       })
       .catch((e) => {
         console.error("Mekan Ekleme Hatası:", e);
-        // Hatanın detayını kullanıcıya gösterelim (alert içinde)
         if (e.response && e.response.data) {
              alert("Hata Detayı: " + JSON.stringify(e.response.data));
         } else {

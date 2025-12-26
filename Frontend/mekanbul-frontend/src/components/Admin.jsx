@@ -8,7 +8,20 @@ function Admin() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // --- 1. GÜVENLİK KONTROLÜ (YENİ EKLENEN KISIM) ---
+  // Sayfa açılır açılmaz çalışır. Kullanıcı yoksa Login'e atar.
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+    // Kullanıcı yoksa, token yoksa VEYA admin değilse
+    if (!user || !user.token || !user.isAdmin) {
+        navigate("/login");
+    }
+  }, [navigate]);
+  // -------------------------------------------------
+
+  useEffect(() => {
+    // Eğer yukarıdaki kontrolden geçerse (yani adminse) burası çalışır
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -45,7 +58,7 @@ function Admin() {
     // BURASI ÇOK ÖNEMLİ: Hem id'ye hem _id'ye bakıyoruz!
     const venueId = venue.id || venue._id;
 
-    console.log("Silinecek ID:", venueId); // Konsola yazalım, undefined mi görelim
+    console.log("Silinecek ID:", venueId); 
 
     if (!venueId) {
         alert("HATA: Mekan ID'si bulunamadı! Konsolu (F12) kontrol edin.");
@@ -57,7 +70,7 @@ function Admin() {
          const user = JSON.parse(localStorage.getItem("user"));
          if (!user || !user.token) {
             alert("Silme işlemi için giriş yapmalısınız!");
-            return;
+            return; // Burada return yaparak işlemi durduruyoruz
          }
 
          await VenueDataService.removeVenue(venueId, user.token);
