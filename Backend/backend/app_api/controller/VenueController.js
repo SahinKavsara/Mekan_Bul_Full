@@ -55,21 +55,22 @@ const listVenues = function (req, res) {
     }
 };
 
-// 2. EKLE
+// 2. EKLE (DÜZELTİLDİ: 'days' -> 'day')
 const addVenue = async function (req, res) {
     try {
+        console.log("Yeni Mekan İsteği Geldi:", req.body);
         await Venue.create({
             ...req.body,
-            coordinates: [req.body.lat, req.body.long],
+            coordinates: [parseFloat(req.body.lat), parseFloat(req.body.long)],
             hours: [
                 {
-                    days: req.body.days1,
+                    day: req.body.days1,    // <-- DÜZELTME BURADA ('days' yerine 'day')
                     open: req.body.open1,
                     close: req.body.close1,
                     isClosed: req.body.isClosed1
                 },
                 {
-                    days: req.body.days2,
+                    day: req.body.days2,    // <-- DÜZELTME BURADA
                     open: req.body.open2,
                     close: req.body.close2,
                     isClosed: req.body.isClosed2
@@ -80,6 +81,7 @@ const addVenue = async function (req, res) {
         })
     }
     catch (error) {
+        console.log("MEKAN EKLEME HATASI:", error);
         createResponse(res, "400", error);
     }
 };
@@ -97,7 +99,7 @@ const getVenue = async function (req, res) {
     }
 }
 
-// 4. GÜNCELLE
+// 4. GÜNCELLE (DÜZELTİLDİ: 'days' -> 'day')
 const updateVenue = async function (req, res) {
     try {
         const authHeader = req.headers.authorization;
@@ -121,13 +123,13 @@ const updateVenue = async function (req, res) {
                 coordinates: [req.body.lat, req.body.long],
                 hours: [
                     {
-                        days: req.body.day1,
+                        day: req.body.day1,   // <-- DÜZELTME BURADA
                         open: req.body.open1,
                         close: req.body.close1,
                         isClosed: req.body.isClosed1
                     },
                     {
-                        days: req.body.day2,
+                        day: req.body.day2,   // <-- DÜZELTME BURADA
                         open: req.body.open2,
                         close: req.body.close2,
                         isClosed: req.body.isClosed2
@@ -139,6 +141,7 @@ const updateVenue = async function (req, res) {
 
         createResponse(res, 201, updatedVenue);
     } catch (error) {
+        console.log("GÜNCELLEME HATASI:", error);
         createResponse(res, 400, { status: "Güncelleme başarsız.", error });
     }
 };
@@ -157,7 +160,6 @@ const deleteVenue = async function (req, res) {
         try {
             user = jwt.verify(token, process.env.JWT_SECRET);
         } catch (err) {
-            console.log("Token hatası:", err.message);
             return createResponse(res, 401, { "status": "Geçersiz Token." });
         }
 
@@ -172,12 +174,10 @@ const deleteVenue = async function (req, res) {
             createResponse(res, 404, { status: "Böyle bir mekan bulunamadı!" });
         }
     } catch (error) {
-        console.log("HATA:", error);
         createResponse(res, 400, { status: "Silme işlemi başarısız.", error });
     }
 };
 
-// BU KISIM ÇOK ÖNEMLİ! EĞER BU YOKSA HATA ALIRSIN.
 module.exports = {
     listVenues,
     addVenue,
